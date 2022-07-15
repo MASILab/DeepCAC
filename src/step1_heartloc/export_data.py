@@ -387,7 +387,7 @@ def run_core(curated_dir_path, qc_curated_dir_path, export_png,
 ## ----------------------------------------
 
 def export_data(raw_data_dir_path, curated_dir_path, qc_curated_dir_path,
-                curated_size, curated_spacing, num_cores, export_png, has_manual_seg):
+                curated_size, curated_spacing, num_cores, export_png, has_manual_seg, input_scan_postfix):
 
   """
   
@@ -401,6 +401,7 @@ def export_data(raw_data_dir_path, curated_dir_path, qc_curated_dir_path,
     num_cores           - required : number of cores to use for the multiprocessing 
     export_png          - required : whether to export the quality control png or not
     has_manual_seg      - required : whether a manual segmentation for the volume is available or not
+    input_scan_postfix  - required : the postfix of the input imaging file. Technically, all file format itk support can be supported by this code.
 
   """
   
@@ -411,12 +412,12 @@ def export_data(raw_data_dir_path, curated_dir_path, qc_curated_dir_path,
   # the data potentially in parallel
   for patient_dir in patient_folders:
     patient_id = os.path.basename(patient_dir)
-    img_file = os.path.join(patient_dir, 'img.nrrd')
-    msk_file = os.path.join(patient_dir, 'msk.nrrd')
+    img_file = os.path.join(patient_dir, 'img%s' % input_scan_postfix)
+    msk_file = os.path.join(patient_dir, 'msk%s' % input_scan_postfix)
     patients_data[patient_id] = [img_file, msk_file]
   
   print "Data preprocessing:"
-  print 'Found', len(patients_data), 'patients under "%s"'%(raw_data_dir_path)
+  print 'Found', len(patients_data), 'patients under "%s"' % raw_data_dir_path
 
   # if single core, then run core as one would normally do with a function
   if num_cores == 1:

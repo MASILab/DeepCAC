@@ -128,8 +128,8 @@ def test(model, dataDir, output_dir_npy, output_dir_png, pkl_file,
         save_png(patientID, output_dir_png, imgsTrue[patientIndex], msksTrue[patientIndex], msksPred[j, :, :, :, 0])
 
 
-def run_inference(model_output_dir_path, model_input_dir_path, model_weights_dir_path,
-                  crop_size, export_png, model_down_steps, extended, has_manual_seg, weights_file_name):
+def run_inference(model_output_dir_path, model_input_dir_path,
+                  crop_size, export_png, model_down_steps, extended, has_manual_seg, model_weight_path):
   mgpu = 1
 
   print "\nDeep Learning model inference using " + str(mgpu) + "xGPUs:"
@@ -144,7 +144,7 @@ def run_inference(model_output_dir_path, model_input_dir_path, model_weights_dir
   test_file = "step1_test_data.h5"
   pkl_file = "step1_downsample_results.pkl"
 
-  weights_file = os.path.join(model_weights_dir_path, weights_file_name)
+  weights_file = model_weight_path
 
   print 'Loading saved model from "%s"'%(weights_file)
   

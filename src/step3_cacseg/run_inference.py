@@ -155,8 +155,7 @@ def test(model, patient_data, cube_size, output_dir_npy, output_dir_png, th, exp
 ## ----------------------------------------
 ## ----------------------------------------
 
-def run_inference(data_dir, model_weights_dir_path, weights_file_name,
-                  output_dir, export_cac_slices_png, has_manual_seg):
+def run_inference(data_dir, output_dir, export_cac_slices_png, has_manual_seg, model_weight_path):
 
   mgpu = 1
   print "\nDeep Learning model inference using %xGPUs:" % mgpu
@@ -199,7 +198,8 @@ def run_inference(data_dir, model_weights_dir_path, weights_file_name,
   if not os.path.exists(output_dir_png): os.mkdir(output_dir_png)
   if not os.path.exists(log_dir): os.mkdir(log_dir)
 
-  weights_file = os.path.join(model_weights_dir_path, weights_file_name)
+  # weights_file = os.path.join(model_weights_dir_path, weights_file_name)
+  weights_file = model_weight_path
 
   test_data = load_test_data(data_dir, mask = has_manual_seg)
   print 'Found', len(test_data), 'patients under "%s"'%(data_dir)

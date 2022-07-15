@@ -26,8 +26,8 @@ from step3_cacseg import run_inference
 
 ## ----------------------------------------
 
-base_conf_file_path = 'config/'
-conf_file_list = [f for f in os.listdir(base_conf_file_path) if f.split('.')[-1] == 'yaml']
+# base_conf_file_path = 'config/'
+# conf_file_list = [f for f in os.listdir(base_conf_file_path) if f.split('.')[-1] == 'yaml']
 
 parser = argparse.ArgumentParser(description = 'Run pipeline step 3 - CAC segmentation.')
 
@@ -35,14 +35,15 @@ parser.add_argument('--conf',
                     required = False,
                     help = 'Specify the YAML configuration file containing the run details.' \
                             + 'Defaults to "cac_segmentation.yaml"',
-                    choices = conf_file_list,
+                    # choices = conf_file_list,
                     default = "step3_cac_segmentation.yaml",
                    )
 
 
 args = parser.parse_args()
 
-conf_file_path = os.path.join(base_conf_file_path, args.conf)
+# conf_file_path = os.path.join(base_conf_file_path, args.conf)
+conf_file_path = args.conf
 
 with open(conf_file_path) as f:
   yaml_conf = yaml.load(f, Loader = yaml.FullLoader)
@@ -62,7 +63,7 @@ dilated_data_folder_name = yaml_conf["io"]["dilated_data_folder_name"]
 cropped_data_folder_name = yaml_conf["io"]["cropped_data_folder_name"]
 qc_cropped_data_folder_name = yaml_conf["io"]["qc_cropped_data_folder_name"]
 
-model_weights_folder_name = yaml_conf["io"]["model_weights_folder_name"]
+# model_weights_folder_name = yaml_conf["io"]["model_weights_folder_name"]
 model_output_folder_name = yaml_conf["io"]["model_output_folder_name"]
 
 # preprocessing and inference parameters
@@ -74,7 +75,7 @@ use_inferred_masks = yaml_conf["processing"]["use_inferred_masks"]
 patch_size = yaml_conf["processing"]["patch_size"]
 
 # model config
-weights_file_name = yaml_conf["model"]["weights_file_name"]
+# weights_file_name = yaml_conf["model"]["weights_file_name"]
 
 if has_manual_seg:
   # if manual segmentation masks are available and "use_inferred_masks" is set to False
@@ -95,6 +96,7 @@ else:
 heartloc_data_path = os.path.join(data_folder_path, heartloc_data_folder_name)
 heartseg_data_path = os.path.join(data_folder_path, heartseg_data_folder_name)
 cacs_data_path = os.path.join(data_folder_path, cacs_data_folder_name)
+if not os.path.exists(cacs_data_path): os.makedirs(cacs_data_path)
 
 # set paths: results from step 1 - data preprocessing
 curated_dir_path = os.path.join(heartloc_data_path, curated_data_folder_name) 
@@ -107,7 +109,7 @@ cropped_dir_name = os.path.join(cacs_data_path, cropped_data_folder_name)
 qc_cropped_dir_name = os.path.join(cacs_data_path, qc_cropped_data_folder_name)
 
 # set paths: model processing
-model_weights_dir_path = os.path.join(cacs_data_path, model_weights_folder_name)
+# model_weights_dir_path = os.path.join(cacs_data_path, model_weights_folder_name)
 model_output_dir_path = os.path.join(cacs_data_path, model_output_folder_name)
 
 
@@ -125,8 +127,8 @@ assert os.path.exists(step2_inferred_dir_path)
 assert len(os.listdir(step2_inferred_dir_path))
 
 # assert the weights folder exists and the weights file is found
-weights_file = os.path.join(model_weights_dir_path, weights_file_name)
-assert os.path.exists(weights_file)
+# weights_file = os.path.join(model_weights_dir_path, weights_file_name)
+# assert os.path.exists(weights_file)
 
 if not os.path.exists(model_output_dir_path): os.mkdir(model_output_dir_path)
 
@@ -136,24 +138,23 @@ if not os.path.exists(model_output_dir_path): os.mkdir(model_output_dir_path)
 print "\n--- STEP 3 - CAC SEGMENTATION ---\n"
 
 # 
-# dilate_segmasks.dilate_segmasks(pred_dir = step2_inferred_dir_path,
-#                                 output_dir = dilated_dir_path,
-#                                 num_cores = num_cores)
+dilate_segmasks.dilate_segmasks(pred_dir = step2_inferred_dir_path,
+                                output_dir = dilated_dir_path,
+                                num_cores = num_cores)
 
 #
-# crop_data.crop_data(raw_input = curated_dir_path,
-#                     prd_input = dilated_dir_path,
-#                     data_output = cropped_dir_name,
-#                     png_output = qc_cropped_dir_name,
-#                     patch_size = patch_size,
-#                     num_cores = num_cores,
-#                     has_manual_seg = has_manual_seg,
-#                     export_png = export_png)
+crop_data.crop_data(raw_input = curated_dir_path,
+                    prd_input = dilated_dir_path,
+                    data_output = cropped_dir_name,
+                    png_output = qc_cropped_dir_name,
+                    patch_size = patch_size,
+                    num_cores = num_cores,
+                    has_manual_seg = has_manual_seg,
+                    export_png = export_png)
 
 #
 run_inference.run_inference(data_dir = cropped_dir_name,
-                            model_weights_dir_path = model_weights_dir_path,
-                            weights_file_name = weights_file_name,
                             output_dir = model_output_dir_path,
                             export_cac_slices_png = export_cac_slices_png,
-                            has_manual_seg = has_manual_seg)
+                            has_manual_seg = has_manual_seg,
+                            model_weight_path= yaml_conf["model"]["model_check_point"])

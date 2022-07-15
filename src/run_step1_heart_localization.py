@@ -28,8 +28,8 @@ from step1_heartloc import upsample_results
 
 ## ----------------------------------------
 
-base_conf_file_path = 'config/'
-conf_file_list = [f for f in os.listdir(base_conf_file_path) if f.split('.')[-1] == 'yaml']
+# base_conf_file_path = 'config/'
+# conf_file_list = [f for f in os.listdir(base_conf_file_path) if f.split('.')[-1] == 'yaml']
 
 parser = argparse.ArgumentParser(description = 'Run pipeline step 1 - heart localization.')
 
@@ -37,14 +37,15 @@ parser.add_argument('--conf',
                     required = False,
                     help = 'Specify the YAML configuration file containing the run details. ' \
                             + 'Defaults to "heart_localization.yaml"',
-                    choices = conf_file_list,
+                    # choices = conf_file_list,
                     default = "step1_heart_localization.yaml",
                    )
 
 
 args = parser.parse_args()
 
-conf_file_path = os.path.join(base_conf_file_path, args.conf)
+# conf_file_path = os.path.join(base_conf_file_path, args.conf)
+conf_file_path = args.conf
 
 with open(conf_file_path) as f:
   yaml_conf = yaml.load(f, Loader = yaml.FullLoader)
@@ -60,7 +61,7 @@ curated_data_folder_name = yaml_conf["io"]["curated_data_folder_name"]
 qc_curated_data_folder_name = yaml_conf["io"]["qc_curated_data_folder_name"]
 resampled_data_folder_name = yaml_conf["io"]["resampled_data_folder_name"]
 model_input_folder_name = yaml_conf["io"]["model_input_folder_name"]
-model_weights_folder_name = yaml_conf["io"]["model_weights_folder_name"]
+# model_weights_folder_name = yaml_conf["io"]["model_weights_folder_name"]
 model_output_folder_name = yaml_conf["io"]["model_output_folder_name"]
 upsampled_data_folder_name = yaml_conf["io"]["upsampled_data_folder_name"]
 
@@ -76,7 +77,7 @@ model_input_size = yaml_conf["processing"]["model_input_size"]
 model_input_spacing = yaml_conf["processing"]["model_input_spacing"]
 
 # model config
-weights_file_name = yaml_conf["model"]["weights_file_name"]
+# weights_file_name = yaml_conf["model"]["weights_file_name"]
 down_steps = yaml_conf["model"]["down_steps"]
 extended = yaml_conf["model"]["extended"]
 
@@ -92,7 +93,7 @@ resampled_dir_path = os.path.join(heartloc_data_path, resampled_data_folder_name
 
 # set paths: model processing
 model_input_dir_path = os.path.join(heartloc_data_path, model_input_folder_name)
-model_weights_dir_path = os.path.join(heartloc_data_path, model_weights_folder_name)
+# model_weights_dir_path = os.path.join(heartloc_data_path, model_weights_folder_name)
 model_output_dir_path = os.path.join(heartloc_data_path, model_output_folder_name)
 
 # set paths: final location of the inferred masks (NRRD)
@@ -106,8 +107,8 @@ if not os.path.exists(resampled_dir_path): os.mkdir(resampled_dir_path)
 if not os.path.exists(model_input_dir_path): os.mkdir(model_input_dir_path)
 
 # assert the weights folder exists and the weights file is found
-weights_file = os.path.join(model_weights_dir_path, weights_file_name)
-assert os.path.exists(weights_file)
+# weights_file = os.path.join(model_weights_dir_path, weights_file_name)
+# assert os.path.exists(weights_file)
 
 if not os.path.exists(model_output_dir_path): os.mkdir(model_output_dir_path)
 if not os.path.exists(model_output_nrrd_dir_path): os.mkdir(model_output_nrrd_dir_path)
@@ -125,7 +126,9 @@ export_data.export_data(raw_data_dir_path = raw_data_dir_path,
                         curated_spacing = curated_spacing,
                         num_cores = num_cores,
                         export_png = export_png,
-                        has_manual_seg = has_manual_seg)
+                        has_manual_seg = has_manual_seg,
+                        input_scan_postfix = yaml_conf['io']['input_scan_postfix']
+                        )
 
 # data downsampling
 downsample_data.downsample_data(curated_dir_path = curated_dir_path,
@@ -148,13 +151,13 @@ input_data_prep.input_data_prep(resampled_dir_path = resampled_dir_path,
 # model inference
 run_inference.run_inference(model_output_dir_path = model_output_dir_path,
                             model_input_dir_path = model_input_dir_path,
-                            model_weights_dir_path = model_weights_dir_path,
                             crop_size = model_input_size,
                             export_png = export_png,
                             model_down_steps = down_steps,
                             extended = extended,
                             has_manual_seg = has_manual_seg,
-                            weights_file_name = weights_file_name)
+                            model_weight_path= yaml_conf["model"]["model_check_point"]
+                            )
 
 # post-processing (upsample)
 upsample_results.upsample_results(curated_dir_path = curated_dir_path,

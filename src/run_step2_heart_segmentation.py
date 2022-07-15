@@ -29,8 +29,8 @@ from step2_heartseg import compute_metrics
 
 ## ----------------------------------------
 
-base_conf_file_path = 'config/'
-conf_file_list = [f for f in os.listdir(base_conf_file_path) if f.split('.')[-1] == 'yaml']
+# base_conf_file_path = 'config/'
+# conf_file_list = [f for f in os.listdir(base_conf_file_path) if f.split('.')[-1] == 'yaml']
 
 parser = argparse.ArgumentParser(description = 'Run pipeline step 2 - heart segmentation.')
 
@@ -38,14 +38,14 @@ parser.add_argument('--conf',
                     required = False,
                     help = 'Specify the YAML configuration file containing the run details.' \
                             + 'Defaults to "heart_segmentation.yaml"',
-                    choices = conf_file_list,
+                    # choices = conf_file_list,
                     default = "step2_heart_segmentation.yaml",
                    )
 
-
 args = parser.parse_args()
 
-conf_file_path = os.path.join(base_conf_file_path, args.conf)
+# conf_file_path = os.path.join(base_conf_file_path, args.conf)
+conf_file_path = args.conf
 
 with open(conf_file_path) as f:
   yaml_conf = yaml.load(f, Loader = yaml.FullLoader)
@@ -63,7 +63,7 @@ step1_inferred_data_folder_name = yaml_conf["io"]["step1_inferred_data_folder_na
 bbox_folder_name = yaml_conf["io"]["bbox_folder_name"]
 cropped_data_folder_name = yaml_conf["io"]["cropped_data_folder_name"]
 model_input_folder_name = yaml_conf["io"]["model_input_folder_name"]
-model_weights_folder_name = yaml_conf["io"]["model_weights_folder_name"]
+# model_weights_folder_name = yaml_conf["io"]["model_weights_folder_name"]
 model_output_folder_name = yaml_conf["io"]["model_output_folder_name"]
 upsampled_data_folder_name = yaml_conf["io"]["upsampled_data_folder_name"]
 seg_metrics_folder_name = yaml_conf["io"]["seg_metrics_folder_name"]
@@ -82,7 +82,7 @@ final_size = yaml_conf["processing"]["final_size"]
 final_spacing = yaml_conf["processing"]["final_spacing"]
 
 # model config
-weights_file_name = yaml_conf["model"]["weights_file_name"]
+# weights_file_name = yaml_conf["model"]["weights_file_name"]
 down_steps = yaml_conf["model"]["down_steps"]
 
 
@@ -104,6 +104,7 @@ else:
 # set paths: step1 and step2
 heartloc_data_path = os.path.join(data_folder_path, heartloc_data_folder_name)
 heartseg_data_path = os.path.join(data_folder_path, heartseg_data_folder_name)
+if not os.path.exists(heartseg_data_path): os.makedirs(heartseg_data_path)
 
 # set paths: results from step 1 - heart localisation
 curated_dir_path = os.path.join(heartloc_data_path, curated_data_folder_name)
@@ -114,7 +115,7 @@ cropped_dir_name = os.path.join(heartseg_data_path, cropped_data_folder_name)
 
 # set paths: model processing
 model_input_dir_path = os.path.join(heartseg_data_path, model_input_folder_name)
-model_weights_dir_path = os.path.join(heartseg_data_path, model_weights_folder_name)
+# model_weights_dir_path = os.path.join(heartseg_data_path, model_weights_folder_name)
 model_output_dir_path = os.path.join(heartseg_data_path, model_output_folder_name)
 
 # set paths: final location where the inferred masks (NRRD) and the metrics,
@@ -138,8 +139,8 @@ assert len(os.listdir(step1_inferred_dir_path))
 
 
 # assert the weights folder exists and the weights file is found
-weights_file = os.path.join(model_weights_dir_path, weights_file_name)
-assert os.path.exists(weights_file)
+# weights_file = os.path.join(model_weights_dir_path, weights_file_name)
+# assert os.path.exists(weights_file)
 
 if not os.path.exists(model_output_dir_path): os.mkdir(model_output_dir_path)
 if not os.path.exists(model_output_nrrd_dir_path): os.mkdir(model_output_nrrd_dir_path)
@@ -150,41 +151,41 @@ if not os.path.exists(result_metrics_dir_path): os.mkdir(result_metrics_dir_path
 # run the segmentation pipeline
 print "\n--- STEP 2 - HEART SEGMENTATION ---\n"
 
-# 
-# compute_bbox.compute_bbox(cur_dir = curated_dir_path,
-#                           pred_dir = step1_inferred_dir_path,
-#                           output_dir = bbox_dir_path,
-#                           num_cores = num_cores,
-#                           has_manual_seg = has_manual_seg,
-#                           run = run)
+#
+compute_bbox.compute_bbox(cur_dir = curated_dir_path,
+                          pred_dir = step1_inferred_dir_path,
+                          output_dir = bbox_dir_path,
+                          num_cores = num_cores,
+                          has_manual_seg = has_manual_seg,
+                          run = run)
 
+#
+crop_data.crop_data(bb_calc_dir = bbox_dir_path,
+                    output_dir = cropped_dir_name,
+                    network_dir = model_input_dir_path,
+                    inter_size = inter_size,
+                    final_size = final_size,
+                    final_spacing = final_spacing,
+                    num_cores = num_cores)
 
-# crop_data.crop_data(bb_calc_dir = bbox_dir_path,
-#                     output_dir = cropped_dir_name,
-#                     network_dir = model_input_dir_path,
-#                     inter_size = inter_size,
-#                     final_size = final_size,
-#                     final_spacing = final_spacing,
-#                     num_cores = num_cores)
+#
+input_data_prep.input_data_prep(input_dir = cropped_dir_name,
+                                output_dir = model_input_dir_path,
+                                run = run,
+                                fill_holes = fill_mask_holes,
+                                final_size = final_size)
 
+#
+run_inference.run_inference(data_dir = model_input_dir_path,
+                            output_dir = model_output_dir_path,
+                            export_png = export_png,
+                            final_size = final_size,
+                            training_size = training_size,
+                            down_steps = down_steps,
+                            model_weight_path= yaml_conf["model"]["model_check_point"]
+                            )
 
-# input_data_prep.input_data_prep(input_dir = cropped_dir_name,
-#                                 output_dir = model_input_dir_path,
-#                                 run = run,
-#                                 fill_holes = fill_mask_holes,
-#                                 final_size = final_size)
-
-
-# run_inference.run_inference(model_weights_dir_path = model_weights_dir_path,
-#                             data_dir = model_input_dir_path,
-#                             output_dir = model_output_dir_path,
-#                             weights_file_name = weights_file_name,
-#                             export_png = export_png,
-#                             final_size = final_size,
-#                             training_size = training_size,
-#                             down_steps = down_steps)
-
-
+#
 upsample_results.upsample_results(cur_input = curated_dir_path,
                                   crop_input = cropped_dir_name,
                                   network_dir = model_input_dir_path,

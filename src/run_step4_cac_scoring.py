@@ -28,8 +28,8 @@ from multiprocessing import Pool, Manager
 
 ## ----------------------------------------
 
-base_conf_file_path = 'config/'
-conf_file_list = [f for f in os.listdir(base_conf_file_path) if f.split('.')[-1] == 'yaml']
+# base_conf_file_path = 'config/'
+# conf_file_list = [f for f in os.listdir(base_conf_file_path) if f.split('.')[-1] == 'yaml']
 
 parser = argparse.ArgumentParser(description = 'Run pipeline step 4 - CAC scoring.')
 
@@ -37,14 +37,14 @@ parser.add_argument('--conf',
                     required = False,
                     help = 'Specify the YAML configuration file containing the run details.' \
                             + 'Defaults to "cac_scoring.yaml"',
-                    choices = conf_file_list,
+                    # choices = conf_file_list,
                     default = "step4_cac_scoring.yaml",
                    )
 
-
 args = parser.parse_args()
 
-conf_file_path = os.path.join(base_conf_file_path, args.conf)
+# conf_file_path = os.path.join(base_conf_file_path, args.conf)
+conf_file_path = args.conf
 
 with open(conf_file_path) as f:
   yaml_conf = yaml.load(f, Loader = yaml.FullLoader)
@@ -74,6 +74,7 @@ num_cores = yaml_conf["processing"]["num_cores"]
 heartloc_data_path = os.path.join(data_folder_path, heartloc_data_folder_name)
 heartseg_data_path = os.path.join(data_folder_path, heartseg_data_folder_name)
 cacseg_data_path = os.path.join(data_folder_path, cacseg_data_folder_name)
+if not os.path.exists(cacseg_data_path): os.makedirs(cacseg_data_path)
 
 # set paths: results from step 1 - data preprocessing
 curated_dir_path = os.path.join(heartloc_data_path, curated_data_folder_name) 

@@ -57,8 +57,8 @@ def save_png(patientID, output_dir_png, img, msk, pred):
 ## ----------------------------------------
 ## ----------------------------------------
 
-def run_inference(model_weights_dir_path, data_dir, output_dir,
-                  weights_file_name, export_png, final_size, training_size, down_steps):
+def run_inference(data_dir, output_dir,
+                  export_png, final_size, training_size, down_steps, model_weight_path):
 
   mgpu = 1
 
@@ -74,8 +74,8 @@ def run_inference(model_weights_dir_path, data_dir, output_dir,
   inputShape = (training_size[2], training_size[1], training_size[0], 1)
   model = heartseg_model.getUnet3d(down_steps=down_steps, input_shape=inputShape, mgpu=mgpu, ext=True)
 
-  print 'Loading saved model from "%s"'%(model_weights_dir_path)
-  weights_file = os.path.join(model_weights_dir_path, weights_file_name)
+  weights_file = model_weight_path
+  print 'Loading saved model from "%s"' % weights_file
   model.load_weights(weights_file)
 
   test_file = "step2_test_data.h5"

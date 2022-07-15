@@ -2,7 +2,7 @@
 
 io:
   # parent data directory
-  path_to_data_folder: "../data"
+  path_to_data_folder: "/nfs/masi/xuk9/Projects/ThoraxLevelBCA/DeepCAC/VLSP_pilot"
   
   # parent data directory subdir where raw data should be found
   raw_data_folder_name: "raw"
@@ -33,7 +33,7 @@ io:
   model_input_folder_name: "model_input"
   
   # subdir under which the heart localisation network weights should be found
-  model_weights_folder_name: "model_weights"
+#  model_weights_folder_name: "model_weights"
   
   # subdir under which the resulting segmentation should be saved
   model_output_folder_name: "model_output"
@@ -48,7 +48,7 @@ io:
 
 processing:
   # whether or not the segmentation masks are available
-  has_manual_seg: true
+  has_manual_seg: false
   
   # whether or not holes in segmentation masks should be filled
   fill_mask_holes: true
@@ -86,6 +86,9 @@ processing:
 
 # config parameters for the model architecture
 model:
+  # Path to the weight file of pre-trained model
+  model_check_point: '/nfs/masi/xuk9/Projects/ThoraxLevelBCA/DeepCAC/models/step2_heartseg_model_weights.hdf5'
+
   # to avoid problems, consider reading this as tuple when training
   pool_size: [2, 2, 2]
   
@@ -99,7 +102,7 @@ model:
   extended: False
 
   # name of the file where the weights are stored (under "model_weights_folder_name")
-  weights_file_name: "step2_heartseg_model_weights.hdf5"
+#  weights_file_name: "step2_heartseg_model_weights.hdf5"
 
   # hyperparameters used during the training of the heart segmentation model
   training:

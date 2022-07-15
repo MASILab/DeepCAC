@@ -2,7 +2,7 @@
 
 io:
   # parent data directory
-  path_to_data_folder: "../data" # this directory should exist already
+  path_to_data_folder: "/nfs/masi/xuk9/Projects/ThoraxLevelBCA/DeepCAC/VLSP_pilot" # this directory should exist already
   
   # parent data directory subdir where raw data should be found
   raw_data_folder_name: "raw" # this directory should exist already (provided)
@@ -36,7 +36,7 @@ io:
   qc_cropped_data_folder_name: "cropped_qc"
     
   # subdir under which the heart localisation network weights should be found
-  model_weights_folder_name: "model_weights" # this directory should exist already (provided)
+#  model_weights_folder_name: "model_weights" # this directory should exist already (provided)
   
   # subdir under which the resulting segmentation should be saved
   model_output_folder_name: "model_output"
@@ -45,7 +45,7 @@ io:
 
 processing:
   # whether or not the segmentation masks are available
-  has_manual_seg: true
+  has_manual_seg: false
     
   # whether or not png images for quality control should be exported
   export_png: true
@@ -67,5 +67,7 @@ processing:
 
 # config parameters for the model architecture
 model:
+  model_check_point: '/nfs/masi/xuk9/Projects/ThoraxLevelBCA/DeepCAC/models/step3_cacseg_model_weights.hdf5'
+
   # name of the file where the weights are stored (under "model_weights_folder_name")
-  weights_file_name: "step3_cacseg_model_weights.hdf5"
+#  weights_file_name: "step3_cacseg_model_weights.hdf5"
