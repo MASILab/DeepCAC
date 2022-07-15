@@ -11,7 +11,8 @@
 """
 
 import os
-import tables
+# import tables
+import h5py
 import numpy as np
 import SimpleITK as sitk
 import scipy.ndimage as ndimage
@@ -38,14 +39,20 @@ def write_data_file(dataDir, dataFile, fileList, fill_holes, cube_size):
 
   if os.path.exists(outputFile):
     os.remove(outputFile)
-  hdf5File = tables.open_file(outputFile, mode='w')
 
-  pIdHdf5 = hdf5File.create_earray(hdf5File.root, 'ID', tables.StringAtom(itemsize=65), shape=(0,))
-  imgHdf5 = hdf5File.create_earray(hdf5File.root, 'img', tables.FloatAtom(),
-                                   shape=(0, cube_size[2], cube_size[1], cube_size[0]))
-  mskHdf5 = hdf5File.create_earray(hdf5File.root, 'msk', tables.UIntAtom(),
-                                   shape=(0, cube_size[2], cube_size[1], cube_size[0]))
+  # Kaiwen - 2022-07-15
+  # Change to use h5py
+  # hdf5File = tables.open_file(outputFile, mode='w')
+  #
+  # pIdHdf5 = hdf5File.create_earray(hdf5File.root, 'ID', tables.StringAtom(itemsize=65), shape=(0,))
+  # imgHdf5 = hdf5File.create_earray(hdf5File.root, 'img', tables.FloatAtom(),
+  #                                  shape=(0, cube_size[2], cube_size[1], cube_size[0]))
+  # mskHdf5 = hdf5File.create_earray(hdf5File.root, 'msk', tables.UIntAtom(),
+  #                                  shape=(0, cube_size[2], cube_size[1], cube_size[0]))
 
+  pat_id_list = []
+  img_list = []
+  msk_list = []  # At this point, the masks have already been generated from previous steps.
   for fileName in fileList:
     # patientID = (os.path.basename(fileName[0])).split('_')[0]
     patientID = os.path.basename(fileName[0]).replace('_img.nrrd', '')
@@ -70,10 +77,30 @@ def write_data_file(dataDir, dataFile, fileList, fill_holes, cube_size):
       for sliceNr in range(len(mskCube)):
         mskCube[sliceNr] = ndimage.binary_fill_holes(mskCube[sliceNr])
 
-    pIdHdf5.append(np.array([patientID], dtype='S65'))
-    imgHdf5.append(imgCube[np.newaxis, ...])
-    mskHdf5.append(mskCube[np.newaxis, ...])
+    # pIdHdf5.append(np.array([patientID], dtype='S65'))
+    # imgHdf5.append(imgCube[np.newaxis, ...])
+    # mskHdf5.append(mskCube[np.newaxis, ...])
+    pat_id_list.append(patientID)
+    img_list.append(imgCube)
+    msk_list.append(mskCube)
 
+  hdf5File = h5py.File(outputFile, 'w')
+  hdf5File.create_dataset(
+    'ID',
+    shape=(len(pat_id_list), 1),
+    dtype='S64',
+    data=pat_id_list
+  )
+  img_stack = np.stack(img_list, axis=0)
+  hdf5File.create_dataset(
+    'img',
+    data=img_stack,
+    chunks=(1, cube_size[2], cube_size[1], cube_size[0]))
+  msk_stack = np.stack(msk_list, axis=0)
+  hdf5File.create_dataset(
+    'msk',
+    data=msk_stack,
+    chunks=(1, cube_size[2], cube_size[1], cube_size[0]))
   hdf5File.close()
 
 

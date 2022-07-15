@@ -11,7 +11,8 @@
 """
 
 import os
-import tables
+# import tables
+import h5py
 import numpy as np
 import heartseg_model
 import matplotlib.pyplot as plt
@@ -59,9 +60,9 @@ def save_png(patientID, output_dir_png, img, msk, pred):
 def run_inference(model_weights_dir_path, data_dir, output_dir,
                   weights_file_name, export_png, final_size, training_size, down_steps):
 
-  print "\nDeep Learning model inference using 4xGPUs:" 
-  
-  mgpu = 4
+  mgpu = 1
+
+  print "\nDeep Learning model inference using %xGPUs:" % mgpu
 
   output_dir_npy = os.path.join(output_dir, 'npy')
   output_dir_png = os.path.join(output_dir, 'png')
@@ -78,16 +79,21 @@ def run_inference(model_weights_dir_path, data_dir, output_dir,
   model.load_weights(weights_file)
 
   test_file = "step2_test_data.h5"
-  testFileHdf5 = tables.open_file(os.path.join(data_dir, test_file), "r")
+  # Kaiwen - 20220715
+  # Change to use h5py
+  # testFileHdf5 = tables.open_file(os.path.join(data_dir, test_file), "r")
+  testFileHdf5 = h5py.File(os.path.join(data_dir, test_file), "r")
 
+  numData = testFileHdf5['ID'].shape[0]
   testDataRaw = []
-  for i in range(len(testFileHdf5.root.ID)):
-    patientID = testFileHdf5.root.ID[i]
-    img = testFileHdf5.root.img[i]
-    msk = testFileHdf5.root.msk[i]
+  for i in range(numData):
+    patientID = testFileHdf5['ID'][i][0]
+    img = testFileHdf5['img'][i]
+    msk = testFileHdf5['msk'][i]
     testDataRaw.append([patientID, img, msk])
 
-  numData = len(testDataRaw)
+  testFileHdf5.close()
+
   imgsTrue = np.zeros((numData, training_size[2], training_size[1], training_size[0]), dtype=np.float64)
   msksTrue = np.zeros((numData, training_size[2], training_size[1], training_size[0]), dtype=np.float64)
 

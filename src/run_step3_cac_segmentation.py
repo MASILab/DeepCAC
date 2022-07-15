@@ -20,7 +20,9 @@ import argparse
 import matplotlib      
 matplotlib.use('Agg')
 
-from step3_cacseg import dilate_segmasks, crop_data, run_inference
+from step3_cacseg import dilate_segmasks
+from step3_cacseg import crop_data
+from step3_cacseg import run_inference
 
 ## ----------------------------------------
 
@@ -134,24 +136,24 @@ if not os.path.exists(model_output_dir_path): os.mkdir(model_output_dir_path)
 print "\n--- STEP 3 - CAC SEGMENTATION ---\n"
 
 # 
-dilate_segmasks.dilate_segmasks(pred_dir = step2_inferred_dir_path,
-                                output_dir = dilated_dir_path,
-                                num_cores = num_cores)
+# dilate_segmasks.dilate_segmasks(pred_dir = step2_inferred_dir_path,
+#                                 output_dir = dilated_dir_path,
+#                                 num_cores = num_cores)
 
 #
-crop_data.crop_data(raw_input = curated_dir_path,
-                    prd_input = dilated_dir_path,
-                    data_output = cropped_dir_name,
-                    png_output = qc_cropped_dir_name,
-                    patch_size = patch_size,
-                    num_cores = num_cores,
-                    has_manual_seg = has_manual_seg,
-                    export_png = export_png)
+# crop_data.crop_data(raw_input = curated_dir_path,
+#                     prd_input = dilated_dir_path,
+#                     data_output = cropped_dir_name,
+#                     png_output = qc_cropped_dir_name,
+#                     patch_size = patch_size,
+#                     num_cores = num_cores,
+#                     has_manual_seg = has_manual_seg,
+#                     export_png = export_png)
 
 #
 run_inference.run_inference(data_dir = cropped_dir_name,
                             model_weights_dir_path = model_weights_dir_path,
                             weights_file_name = weights_file_name,
                             output_dir = model_output_dir_path,
-                            export_cac_slices_png = export_cac_slices_png, 
+                            export_cac_slices_png = export_cac_slices_png,
                             has_manual_seg = has_manual_seg)

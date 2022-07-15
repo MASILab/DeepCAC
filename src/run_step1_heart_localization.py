@@ -118,43 +118,43 @@ if not os.path.exists(model_output_nrrd_dir_path): os.mkdir(model_output_nrrd_di
 print "\n--- STEP 1 - HEART LOCALIZATION ---\n"
 
 # data preparation 
-# export_data.export_data(raw_data_dir_path = raw_data_dir_path,
-#                         curated_dir_path = curated_dir_path,
-#                         qc_curated_dir_path = qc_curated_dir_path,
-#                         curated_size = curated_size,
-#                         curated_spacing = curated_spacing,
-#                         num_cores = num_cores,
-#                         export_png = export_png,
-#                         has_manual_seg = has_manual_seg)
+export_data.export_data(raw_data_dir_path = raw_data_dir_path,
+                        curated_dir_path = curated_dir_path,
+                        qc_curated_dir_path = qc_curated_dir_path,
+                        curated_size = curated_size,
+                        curated_spacing = curated_spacing,
+                        num_cores = num_cores,
+                        export_png = export_png,
+                        has_manual_seg = has_manual_seg)
 
 # data downsampling
-# downsample_data.downsample_data(curated_dir_path = curated_dir_path,
-#                                 resampled_dir_path = resampled_dir_path,
-#                                 model_input_dir_path = model_input_dir_path,
-#                                 crop_size = model_input_size,
-#                                 new_spacing = model_input_spacing,
-#                                 has_manual_seg = has_manual_seg,
-#                                 num_cores = num_cores)
+downsample_data.downsample_data(curated_dir_path = curated_dir_path,
+                                resampled_dir_path = resampled_dir_path,
+                                model_input_dir_path = model_input_dir_path,
+                                crop_size = model_input_size,
+                                new_spacing = model_input_spacing,
+                                has_manual_seg = has_manual_seg,
+                                num_cores = num_cores)
 
 # model input data preparation
-# input_data_prep.input_data_prep(resampled_dir_path = resampled_dir_path,
-#                                 model_input_dir_path = model_input_dir_path,
-#                                 create_test_set = create_test_set,
-#                                 crop_size = model_input_size,
-#                                 new_spacing = model_input_spacing,
-#                                 has_manual_seg = has_manual_seg,
-#                                 fill_mask_holes = fill_mask_holes)
+input_data_prep.input_data_prep(resampled_dir_path = resampled_dir_path,
+                                model_input_dir_path = model_input_dir_path,
+                                create_test_set = create_test_set,
+                                crop_size = model_input_size,
+                                new_spacing = model_input_spacing,
+                                has_manual_seg = has_manual_seg,
+                                fill_mask_holes = fill_mask_holes)
 
 # model inference
-# run_inference.run_inference(model_output_dir_path = model_output_dir_path,
-#                             model_input_dir_path = model_input_dir_path,
-#                             model_weights_dir_path = model_weights_dir_path,
-#                             crop_size = model_input_size,
-#                             export_png = export_png,
-#                             model_down_steps = down_steps,
-#                             extended = extended,
-#                             has_manual_seg = has_manual_seg,
-#                             weights_file_name = weights_file_name)
+run_inference.run_inference(model_output_dir_path = model_output_dir_path,
+                            model_input_dir_path = model_input_dir_path,
+                            model_weights_dir_path = model_weights_dir_path,
+                            crop_size = model_input_size,
+                            export_png = export_png,
+                            model_down_steps = down_steps,
+                            extended = extended,
+                            has_manual_seg = has_manual_seg,
+                            weights_file_name = weights_file_name)
 
 # post-processing (upsample)
 upsample_results.upsample_results(curated_dir_path = curated_dir_path,

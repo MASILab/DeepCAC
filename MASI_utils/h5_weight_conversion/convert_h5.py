@@ -1,34 +1,13 @@
 import h5py
 import numpy as np
 import heartloc_model
+import heartseg_model
+import cacseg_model
 from tensorflow.python.keras import backend as K
 
 
-def convert_stage1_h5():
-    in_h5 = '/nfs/masi/xuk9/src/DeepCAC/data/step1_heartloc/model_weights/step1_heartloc_model_weights.hdf5.bak'
-    out_h5 = '/nfs/masi/xuk9/src/DeepCAC/data/step1_heartloc/model_weights/step1_heartloc_model_weights.updated.hdf5'
-
-    print("Load %s" % in_h5)
-    print("Output %s" % out_h5)
-
-    in_db = h5py.File(in_h5, 'r')
-    out_db = h5py.File(out_h5, 'w')
-
+def _convert_raw_model_weight_h5(in_db, out_db, model):
     in_g = in_db['model_1']
-    # layer_names = in_g.keys()
-    # out_db.attrs['layer_names'] = layer_names
-
-    # Retrieve the layer information directly from the model
-    crop_size = 112
-    model_down_steps = 4
-    extended = False
-    mgpu = 1
-    input_shape = (crop_size, crop_size, crop_size, 1)
-    model = heartloc_model.get_unet_3d(down_steps=model_down_steps,
-                                       input_shape=input_shape,
-                                       mgpu=mgpu,
-                                       ext=extended)
-
     filtered_layers = []
     layer_names = []
     for layer in model.layers:
@@ -53,6 +32,78 @@ def convert_stage1_h5():
         layer_g.attrs['weight_names'] = weight_names
         for weight_name, weight_dataset in in_g[layer_name].items():
             layer_g.create_dataset(weight_name, data=np.asarray(weight_dataset))
+
+
+def convert_stage1_h5():
+    in_h5 = '/nfs/masi/xuk9/src/DeepCAC/data/step1_heartloc/model_weights/step1_heartloc_model_weights.hdf5.bak'
+    out_h5 = '/nfs/masi/xuk9/src/DeepCAC/data/step1_heartloc/model_weights/step1_heartloc_model_weights.updated.hdf5'
+
+    print("Load %s" % in_h5)
+    print("Output %s" % out_h5)
+
+    in_db = h5py.File(in_h5, 'r')
+    out_db = h5py.File(out_h5, 'w')
+
+    # Retrieve the layer information directly from the model
+    crop_size = 112
+    model_down_steps = 4
+    extended = False
+    mgpu = 1
+    input_shape = (crop_size, crop_size, crop_size, 1)
+    model = heartloc_model.get_unet_3d(down_steps=model_down_steps,
+                                       input_shape=input_shape,
+                                       mgpu=mgpu,
+                                       ext=extended)
+    _convert_raw_model_weight_h5(in_db, out_db, model)
+    in_db.close()
+    out_db.close()
+
+
+def convert_stage2_h5():
+    in_h5 = '/nfs/masi/xuk9/src/DeepCAC/data/step2_heartseg/model_weights/step2_heartseg_model_weights.hdf5.bak'
+    out_h5 = '/nfs/masi/xuk9/src/DeepCAC/data/step2_heartseg/model_weights/step2_heartseg_model_weights.updated.hdf5'
+    print("Load %s" % in_h5)
+    print("Output %s" % out_h5)
+    in_db = h5py.File(in_h5, 'r')
+    out_db = h5py.File(out_h5, 'w')
+
+    down_steps = 4
+    training_size = [128, 128, 112]
+    inputShape = (training_size[2], training_size[1], training_size[0], 1)
+    model = heartseg_model.getUnet3d(
+        down_steps=down_steps,
+        input_shape=inputShape,
+        mgpu=1, ext=True)
+
+    _convert_raw_model_weight_h5(in_db, out_db, model)
+
+    in_db.close()
+    out_db.close()
+
+
+def convert_stage3_h5():
+    in_h5 = '/nfs/masi/xuk9/src/DeepCAC/data/step3_cacseg/model_weights/step3_cacseg_model_weights.hdf5.bak'
+    out_h5 = '/nfs/masi/xuk9/src/DeepCAC/data/step3_cacseg/model_weights/step3_cacseg_model_weights.updated.hdf5'
+    print("Load %s" % in_h5)
+    print("Output %s" % out_h5)
+    in_db = h5py.File(in_h5, 'r')
+    out_db = h5py.File(out_h5, 'w')
+
+    optimizer = 'ADAM'
+    mgpu = 1
+    lr = 0.0001
+    down_steps = 3
+    pool_size = (2, 2, 2)
+    conv_size = (3, 3, 3)
+    cube_size = [64, 64, 32]
+    drop_out = 0.5
+    extended = True
+    input_shape = (cube_size[2], cube_size[1], cube_size[0], 1)
+    model = cacseg_model.getUnet3d(down_steps=down_steps, input_shape=input_shape, pool_size=pool_size,
+                                   conv_size=conv_size, initial_learning_rate=lr, mgpu=mgpu,
+                                   extended=extended, drop_out=drop_out, optimizer=optimizer)
+
+    _convert_raw_model_weight_h5(in_db, out_db, model)
 
     in_db.close()
     out_db.close()
@@ -168,7 +219,7 @@ def load_attributes_from_hdf5_group(group, name):
   return data
 
 
-def check_h5_structure():
+def check_stage1_h5_structure():
     in_h5 = '/nfs/masi/xuk9/src/DeepCAC/data/step1_heartloc/model_weights/step1_heartloc_model_weights.updated.hdf5'
 
     crop_size = 112
@@ -544,4 +595,8 @@ def _convert_rnn_weights(layer, weights):
 
 if __name__ == '__main__':
     # convert_stage1_h5()
-    check_h5_structure()
+    # convert_stage2_h5()
+    convert_stage3_h5()
+
+    # check_stage1_h5_structure()
+

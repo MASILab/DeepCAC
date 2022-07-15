@@ -10,7 +10,8 @@
   
 """
 
-import os, tables, socket, sys, pickle, math
+import os, socket, sys, pickle, math
+# import tables
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -156,8 +157,9 @@ def test(model, patient_data, cube_size, output_dir_npy, output_dir_png, th, exp
 
 def run_inference(data_dir, model_weights_dir_path, weights_file_name,
                   output_dir, export_cac_slices_png, has_manual_seg):
-  
-  print "\nDeep Learning model inference using 4xGPUs:" 
+
+  mgpu = 1
+  print "\nDeep Learning model inference using %xGPUs:" % mgpu
   
   # hard-coded model parameters
   th = 0.9
@@ -172,7 +174,7 @@ def run_inference(data_dir, model_weights_dir_path, weights_file_name,
   optimizer = 'ADAM'
   extended = True
   drop_out = 0.5
-  mgpu = 4
+
   lr = 0.0001
   lr_drop = 0.7
   drop_epochs = 100

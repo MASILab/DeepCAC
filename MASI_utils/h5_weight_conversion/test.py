@@ -18,8 +18,8 @@ def keras_version():
 
 def check_keras_h5():
     in_h5_list = [
-        '/nfs/masi/xuk9/src/DeepCAC/data/step1_heartloc/model_weights/step1_heartloc_model_weights.hdf5.bak',
-        '/nfs/masi/xuk9/src/DeepCAC/data/step2_heartseg/model_weights/step2_heartseg_model_weights.hdf5',
+        # '/nfs/masi/xuk9/src/DeepCAC/data/step1_heartloc/model_weights/step1_heartloc_model_weights.hdf5.bak',
+        '/nfs/masi/xuk9/src/DeepCAC/data/step2_heartseg/model_weights/step2_heartseg_model_weights.hdf5.bak',
         '/nfs/masi/xuk9/src/DeepCAC/data/step3_cacseg/model_weights/step3_cacseg_model_weights.hdf5']
     for h5_path in in_h5_list:
         db = h5py.File(h5_path, 'r')
