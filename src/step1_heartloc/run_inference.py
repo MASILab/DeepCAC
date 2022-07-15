@@ -13,7 +13,8 @@
 import os
 
 import sys
-import tables
+# import tables
+import h5py
 import pickle
 import numpy as np
 import matplotlib.pyplot as plt
@@ -65,18 +66,25 @@ def test(model, dataDir, output_dir_npy, output_dir_png, pkl_file,
   # Get the weight file with the highest weight
   model.load_weights(weights_file)
 
-  testFileHdf5 = tables.open_file(os.path.join(dataDir, test_file), "r")
+  # Kaiwen - 20220715
+  # Change to use h5py
+  # testFileHdf5 = tables.open_file(os.path.join(dataDir, test_file), "r")
+  testFileHdf5 = h5py.File(os.path.join(dataDir, test_file), 'r')
   pklData = pickle.load(open(os.path.join(dataDir, pkl_file), 'rb'))
 
   # Get data in one list for further processing
   testDataRaw = []
-  num_test_imgs = len(testFileHdf5.root.ID)
+  # num_test_imgs = len(testFileHdf5.root.ID)
+  num_test_imgs = testFileHdf5['ID'].shape[0]
   for i in range(num_test_imgs):
-    patientID = testFileHdf5.root.ID[i]
-    img = testFileHdf5.root.img[i]
+    # patientID = testFileHdf5.root.ID[i]
+    patientID = testFileHdf5['ID'][i][0]
+    # img = testFileHdf5.root.img[i]
+    img = testFileHdf5['img'][i]
     if has_manual_seg:
-      msk = testFileHdf5.root.msk[i]
-    else:  # Create empty dummy has_manual_seg with same size as the image
+      # msk = testFileHdf5.root.msk[i]
+      msk = testFileHdf5['msk'][i]
+    else:  # Create empty dummy has_manual_seg with   same size as the image
       sizeImg = len(img)
       msk = np.zeros((sizeImg, sizeImg, sizeImg), dtype=np.float64)
     if not patientID in pklData.keys():
@@ -84,6 +92,7 @@ def test(model, dataDir, output_dir_npy, output_dir_png, pkl_file,
       continue
     zDif = pklData[patientID][6][2]
     testDataRaw.append([patientID, img, msk, zDif])
+  testFileHdf5.close()
 
   numData = len(testDataRaw)
   size = len(testDataRaw[0][1])
@@ -121,10 +130,9 @@ def test(model, dataDir, output_dir_npy, output_dir_png, pkl_file,
 
 def run_inference(model_output_dir_path, model_input_dir_path, model_weights_dir_path,
                   crop_size, export_png, model_down_steps, extended, has_manual_seg, weights_file_name):
+  mgpu = 1
 
-  print "\nDeep Learning model inference using 4xGPUs:" 
-  
-  mgpu = 4
+  print "\nDeep Learning model inference using " + str(mgpu) + "xGPUs:"
 
   output_dir_npy = os.path.join(model_output_dir_path, 'npy')
   output_dir_png = os.path.join(model_output_dir_path, 'png')
@@ -148,3 +156,4 @@ def run_inference(model_output_dir_path, model_input_dir_path, model_weights_dir
 
   test(model, model_input_dir_path, output_dir_npy, output_dir_png,
        pkl_file, test_file, weights_file, mgpu, has_manual_seg, export_png)
+  # model.summary()

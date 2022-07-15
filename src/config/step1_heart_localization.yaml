@@ -113,8 +113,8 @@ model:
       augm_axes: [[0, 2], [1, 2], [0, 1]]
       
       # whether multiprocessing should be used or not to generate augmented batches 
-      use_multiprocessing: true
+      use_multiprocessing: false
       
       # if multiprocessing is used to generate augmented batches, do so with the following param.s
-      max_queue_size: 8
-      workers: 8
+      max_queue_size: 1
+      workers: 1

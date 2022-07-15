@@ -13,7 +13,8 @@
 import os
 import sys
 import glob
-import tables
+# import tables
+import h5py
 import numpy as np
 import SimpleITK as sitk
 import scipy.ndimage as ndimage
@@ -111,25 +112,32 @@ def write_data_file(data_dir, data_file, file_list, cube_length, input_spacing, 
   # if the file exists, it will be overwritten
   if os.path.exists(output_file):
     os.remove(output_file)
-    
+
+  # Kaiwen - 2022-07-15
+  # Change to h5py as tables not support anymore for python2.7.
+
   # init the *.h5 file ptr to file/writer
-  hdf5_file = tables.open_file(output_file, mode = 'w')
+  # hdf5_file = tables.open_file(output_file, mode = 'w')
 
   # init earrays to properly write on HDF5 files using PyTables  
-  pat_id_hdf5 = hdf5_file.create_earray(where = hdf5_file.root, 
-                                        name = 'ID', 
-                                        atom = tables.StringAtom(itemsize = 65), 
-                                        shape = (0,))
+  # pat_id_hdf5 = hdf5_file.create_earray(where = hdf5_file.root,
+  #                                       name = 'ID',
+  #                                       atom = tables.StringAtom(itemsize = 65),
+  #                                       shape = (0,))
+  pat_id_list = []
   
-  img_hdf5 = hdf5_file.create_earray(where = hdf5_file.root,
-                                     name = 'img',
-                                     atom = tables.FloatAtom(),
-                                     shape=(0, cube_length, cube_length, cube_length))
+  # img_hdf5 = hdf5_file.create_earray(where = hdf5_file.root,
+  #                                    name = 'img',
+  #                                    atom = tables.FloatAtom(),
+  #                                    shape=(0, cube_length, cube_length, cube_length))
+  img_list = []
+
   if has_manual_seg:
-    msk_hdf5 = hdf5_file.create_earray(where = hdf5_file.root,
-                                       name = 'msk',
-                                       atom = tables.UIntAtom(),
-                                       shape=(0, cube_length, cube_length, cube_length))
+    # msk_hdf5 = hdf5_file.create_earray(where = hdf5_file.root,
+    #                                    name = 'msk',
+    #                                    atom = tables.UIntAtom(),
+    #                                    shape=(0, cube_length, cube_length, cube_length))
+    msk_list = []
 
   
   for file in file_list:
@@ -165,10 +173,12 @@ def write_data_file(data_dir, data_file, file_list, cube_length, input_spacing, 
     img_cropped = ((np.clip(img_cropped, -1024.0, 3071.0)) - 1023.5) / 2047.5
     
     # store ID as a node in the HDF5 vector
-    pat_id_hdf5.append(np.array([pat_id], dtype='S65'))
+    # pat_id_hdf5.append(np.array([pat_id], dtype='S65'))
+    pat_id_list.append(pat_id)
     
     # store image as a node in the HDF5 vector
-    img_hdf5.append(img_cropped[np.newaxis, ...])
+    # img_hdf5.append(img_cropped[np.newaxis, ...])
+    img_list.append(img_cropped)
 
     # if a (manual) segmentation mask is available   
     if has_manual_seg:
@@ -201,8 +211,23 @@ def write_data_file(data_dir, data_file, file_list, cube_length, input_spacing, 
           msk_cropped[slice_idx] = ndimage.binary_fill_holes(msk_cropped[slice_idx])
 
       # store mask as a node in the HDF5 vector
-      msk_hdf5.append(msk_cropped[np.newaxis, ...])
-  
+      # msk_hdf5.append(msk_cropped[np.newaxis, ...])
+      msk_list.append(msk_cropped)
+
+  img_stack = np.stack(img_list, axis=0)
+
+  hdf5_file = h5py.File(output_file, 'w')
+  hdf5_file.create_dataset('ID', shape=(len(pat_id_list), 1), dtype='S64', data=pat_id_list)
+  hdf5_file.create_dataset(
+    'img',
+    data=img_stack,
+    chunks=(1, cube_length, cube_length, cube_length))
+  if has_manual_seg:
+    msk_stack = np.stack(msk_list, axis=0)
+    hdf5_file.create_dataset(
+      'msk',
+      data=msk_stack,
+      chunks=(1, cube_length, cube_length, cube_length))
   hdf5_file.close()
 
 

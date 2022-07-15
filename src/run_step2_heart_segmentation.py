@@ -20,7 +20,12 @@ import argparse
 import matplotlib      
 matplotlib.use('Agg')
 
-from step2_heartseg import compute_bbox, crop_data, input_data_prep, run_inference, upsample_results, compute_metrics
+from step2_heartseg import compute_bbox
+from step2_heartseg import crop_data
+from step2_heartseg import input_data_prep
+# from step2_heartseg import run_inference
+# from step2_heartseg import upsample_results
+# from step2_heartseg import compute_metrics
 
 ## ----------------------------------------
 
@@ -146,23 +151,23 @@ if not os.path.exists(result_metrics_dir_path): os.mkdir(result_metrics_dir_path
 print "\n--- STEP 2 - HEART SEGMENTATION ---\n"
 
 # 
-compute_bbox.compute_bbox(cur_dir = curated_dir_path,
-                          pred_dir = step1_inferred_dir_path,
-                          output_dir = bbox_dir_path,
-                          num_cores = num_cores,
-                          has_manual_seg = has_manual_seg,
-                          run = run)
+# compute_bbox.compute_bbox(cur_dir = curated_dir_path,
+#                           pred_dir = step1_inferred_dir_path,
+#                           output_dir = bbox_dir_path,
+#                           num_cores = num_cores,
+#                           has_manual_seg = has_manual_seg,
+#                           run = run)
 
-#
-crop_data.crop_data(bb_calc_dir = bbox_dir_path,
-                    output_dir = cropped_dir_name, 
-                    network_dir = model_input_dir_path,
-                    inter_size = inter_size,
-                    final_size = final_size,
-                    final_spacing = final_spacing,
-                    num_cores = num_cores)
 
-#
+# crop_data.crop_data(bb_calc_dir = bbox_dir_path,
+#                     output_dir = cropped_dir_name,
+#                     network_dir = model_input_dir_path,
+#                     inter_size = inter_size,
+#                     final_size = final_size,
+#                     final_spacing = final_spacing,
+#                     num_cores = num_cores)
+
+
 input_data_prep.input_data_prep(input_dir = cropped_dir_name,
                                 output_dir = model_input_dir_path,
                                 run = run,
@@ -170,31 +175,31 @@ input_data_prep.input_data_prep(input_dir = cropped_dir_name,
                                 final_size = final_size)
 
 #
-run_inference.run_inference(model_weights_dir_path = model_weights_dir_path,
-                            data_dir = model_input_dir_path,
-                            output_dir = model_output_dir_path,
-                            weights_file_name = weights_file_name,
-                            export_png = export_png,
-                            final_size = final_size,
-                            training_size = training_size,
-                            down_steps = down_steps)
+# run_inference.run_inference(model_weights_dir_path = model_weights_dir_path,
+#                             data_dir = model_input_dir_path,
+#                             output_dir = model_output_dir_path,
+#                             weights_file_name = weights_file_name,
+#                             export_png = export_png,
+#                             final_size = final_size,
+#                             training_size = training_size,
+#                             down_steps = down_steps)
 
 #
-upsample_results.upsample_results(cur_input = curated_dir_path,
-                                  crop_input = cropped_dir_name,
-                                  network_dir = model_input_dir_path,
-                                  test_dir = model_output_dir_path,
-                                  output_dir = model_output_nrrd_dir_path,
-                                  inter_size = inter_size,
-                                  num_cores = num_cores)
+# upsample_results.upsample_results(cur_input = curated_dir_path,
+#                                   crop_input = cropped_dir_name,
+#                                   network_dir = model_input_dir_path,
+#                                   test_dir = model_output_dir_path,
+#                                   output_dir = model_output_nrrd_dir_path,
+#                                   inter_size = inter_size,
+#                                   num_cores = num_cores)
 
 #
-if has_manual_seg == True:
-  compute_metrics.compute_metrics(cur_dir = curated_dir_path,
-                                  pred_dir = model_output_nrrd_dir_path,
-                                  output_dir = result_metrics_dir_path,
-                                  raw_spacing = curated_spacing,
-                                  num_cores = num_cores,
-                                  mask = has_manual_seg)
-else:
-  pass
+# if has_manual_seg == True:
+#   compute_metrics.compute_metrics(cur_dir = curated_dir_path,
+#                                   pred_dir = model_output_nrrd_dir_path,
+#                                   output_dir = result_metrics_dir_path,
+#                                   raw_spacing = curated_spacing,
+#                                   num_cores = num_cores,
+#                                   mask = has_manual_seg)
+# else:
+#   pass
