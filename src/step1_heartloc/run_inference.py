@@ -78,20 +78,23 @@ def test(model, dataDir, output_dir_npy, output_dir_png, pkl_file,
   num_test_imgs = testFileHdf5['ID'].shape[0]
   for i in range(num_test_imgs):
     # patientID = testFileHdf5.root.ID[i]
-    patientID = testFileHdf5['ID'][i][0]
-    # img = testFileHdf5.root.img[i]
-    img = testFileHdf5['img'][i]
-    if has_manual_seg:
-      # msk = testFileHdf5.root.msk[i]
-      msk = testFileHdf5['msk'][i]
-    else:  # Create empty dummy has_manual_seg with   same size as the image
-      sizeImg = len(img)
-      msk = np.zeros((sizeImg, sizeImg, sizeImg), dtype=np.float64)
-    if not patientID in pklData.keys():
-      print('Patient not found in pkl data', patientID)
-      continue
-    zDif = pklData[patientID][6][2]
-    testDataRaw.append([patientID, img, msk, zDif])
+    try:
+      patientID = testFileHdf5['ID'][i][0]
+      # img = testFileHdf5.root.img[i]
+      img = testFileHdf5['img'][i]
+      if has_manual_seg:
+        # msk = testFileHdf5.root.msk[i]
+        msk = testFileHdf5['msk'][i]
+      else:  # Create empty dummy has_manual_seg with   same size as the image
+        sizeImg = len(img)
+        msk = np.zeros((sizeImg, sizeImg, sizeImg), dtype=np.float64)
+      if not patientID in pklData.keys():
+        print('Patient not found in pkl data', patientID)
+        continue
+      zDif = pklData[patientID][6][2]
+      testDataRaw.append([patientID, img, msk, zDif])
+    except:
+      print('Something wrong with %s, skip the case' % patientID)
   testFileHdf5.close()
 
   numData = len(testDataRaw)

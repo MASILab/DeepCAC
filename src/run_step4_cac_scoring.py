@@ -31,63 +31,6 @@ from multiprocessing import Pool, Manager
 # base_conf_file_path = 'config/'
 # conf_file_list = [f for f in os.listdir(base_conf_file_path) if f.split('.')[-1] == 'yaml']
 
-parser = argparse.ArgumentParser(description = 'Run pipeline step 4 - CAC scoring.')
-
-parser.add_argument('--conf',
-                    required = False,
-                    help = 'Specify the YAML configuration file containing the run details.' \
-                            + 'Defaults to "cac_scoring.yaml"',
-                    # choices = conf_file_list,
-                    default = "step4_cac_scoring.yaml",
-                   )
-
-args = parser.parse_args()
-
-# conf_file_path = os.path.join(base_conf_file_path, args.conf)
-conf_file_path = args.conf
-
-with open(conf_file_path) as f:
-  yaml_conf = yaml.load(f, Loader = yaml.FullLoader)
-
-
-# input-output
-data_folder_path = os.path.normpath(yaml_conf["io"]["path_to_data_folder"])
-
-heartloc_data_folder_name = yaml_conf["io"]["heartloc_data_folder_name"]
-heartseg_data_folder_name = yaml_conf["io"]["heartseg_data_folder_name"]
-cacseg_data_folder_name = yaml_conf["io"]["cacseg_data_folder_name"]
-
-curated_data_folder_name = yaml_conf["io"]["curated_data_folder_name"]
-step3_inferred_data_folder_name = yaml_conf["io"]["step3_inferred_data_folder_name"]
-
-cropped_data_folder_name = yaml_conf["io"]["cropped_data_folder_name"]
-
-cac_score_folder_name = yaml_conf["io"]["cac_score_folder_name"]
-
-# preprocessing and inference parameters
-has_manual_seg = yaml_conf["processing"]["has_manual_seg"]
-num_cores = yaml_conf["processing"]["num_cores"]
-
-## ----------------------------------------
-
-# set paths: step1, step2 and step3
-heartloc_data_path = os.path.join(data_folder_path, heartloc_data_folder_name)
-heartseg_data_path = os.path.join(data_folder_path, heartseg_data_folder_name)
-cacseg_data_path = os.path.join(data_folder_path, cacseg_data_folder_name)
-if not os.path.exists(cacseg_data_path): os.makedirs(cacseg_data_path)
-
-# set paths: results from step 1 - data preprocessing
-curated_dir_path = os.path.join(heartloc_data_path, curated_data_folder_name) 
-
-# set paths: results from step 3 - cac segmentation
-cropped_dir_name = os.path.join(cacseg_data_path, cropped_data_folder_name)
-step3_inferred_dir_path = os.path.join(cacseg_data_path, step3_inferred_data_folder_name)
-
-# set paths: final location where the results of the step4 (CAC scores) will be stored
-cacscore_data_path = os.path.join(data_folder_path, cac_score_folder_name)
-
-if not os.path.exists(cacscore_data_path): os.mkdir(cacscore_data_path)
-
 ## ----------------------------------------
 ## ----------------------------------------
 
@@ -212,10 +155,48 @@ def run_core(res_dict, raw_dir, crop_dir, mask, ag_div, nr_con_px, msk_thr, prd_
 ## ----------------------------------------
 ## ----------------------------------------
 
-if __name__ == "__main__":
- 
+
+def run_process(conf_dict):
   print "\n--- STEP 4 - CAC SCORING ---\n"
-   
+
+  # input-output
+  data_folder_path = os.path.normpath(conf_dict["io"]["path_to_data_folder"])
+
+  heartloc_data_folder_name = conf_dict["io"]["heartloc_data_folder_name"]
+  heartseg_data_folder_name = conf_dict["io"]["heartseg_data_folder_name"]
+  cacseg_data_folder_name = conf_dict["io"]["cacseg_data_folder_name"]
+
+  curated_data_folder_name = conf_dict["io"]["curated_data_folder_name"]
+  step3_inferred_data_folder_name = conf_dict["io"]["step3_inferred_data_folder_name"]
+
+  cropped_data_folder_name = conf_dict["io"]["cropped_data_folder_name"]
+
+  cac_score_folder_name = conf_dict["io"]["cac_score_folder_name"]
+
+  # preprocessing and inference parameters
+  has_manual_seg = conf_dict["processing"]["has_manual_seg"]
+  num_cores = conf_dict["processing"]["num_cores"]
+
+  ## ----------------------------------------
+
+  # set paths: step1, step2 and step3
+  heartloc_data_path = os.path.join(data_folder_path, heartloc_data_folder_name)
+  heartseg_data_path = os.path.join(data_folder_path, heartseg_data_folder_name)
+  cacseg_data_path = os.path.join(data_folder_path, cacseg_data_folder_name)
+  if not os.path.exists(cacseg_data_path): os.makedirs(cacseg_data_path)
+
+  # set paths: results from step 1 - data preprocessing
+  curated_dir_path = os.path.join(heartloc_data_path, curated_data_folder_name)
+
+  # set paths: results from step 3 - cac segmentation
+  cropped_dir_name = os.path.join(cacseg_data_path, cropped_data_folder_name)
+  step3_inferred_dir_path = os.path.join(cacseg_data_path, step3_inferred_data_folder_name)
+
+  # set paths: final location where the results of the step4 (CAC scores) will be stored
+  cacscore_data_path = os.path.join(data_folder_path, cac_score_folder_name)
+
+  if not os.path.exists(cacscore_data_path): os.mkdir(cacscore_data_path)
+
   msk_thr = 0.1
   nr_con_px = 3
   ag_div = 3
@@ -263,3 +244,24 @@ if __name__ == "__main__":
   # Calculate mean dice
   mean_dice = sum([res_dict[x][0] for x in res_dict.keys()]) / len(res_dict)
   print '\nMean Dice Score:', round(mean_dice, 2)
+
+
+if __name__ == "__main__":
+  parser = argparse.ArgumentParser(description='Run pipeline step 4 - CAC scoring.')
+
+  parser.add_argument('--conf',
+                      required=False,
+                      help='Specify the YAML configuration file containing the run details.' \
+                           + 'Defaults to "cac_scoring.yaml"',
+                      # choices = conf_file_list,
+                      default="step4_cac_scoring.yaml",
+                      )
+
+  args = parser.parse_args()
+
+  # conf_file_path = os.path.join(base_conf_file_path, args.conf)
+  conf_file_path = args.conf
+
+  with open(conf_file_path) as f:
+    yaml_conf = yaml.load(f, Loader=yaml.FullLoader)
+    run_process(yaml_conf)

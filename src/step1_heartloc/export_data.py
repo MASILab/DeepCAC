@@ -315,73 +315,74 @@ def run_core(curated_dir_path, qc_curated_dir_path, export_png,
   """
 
   print 'Processing patient', patient_id
-  
-  # init SITK reader and writer, load the CT volume in a SITK object
-  nrrd_reader = sitk.ImageFileReader()
-  nrrd_writer = sitk.ImageFileWriter()
-  nrrd_reader.SetFileName(patients_data[patient_id][0])
-  img_sitk = nrrd_reader.Execute()
-  
-  
-  # take care of the size/spacing difference - resample SITK image, expand/crop
-  img_sitk, curated_size = resample_sitk(img_sitk = img_sitk, 
-                                         method = sitk.sitkLinear,
-                                         curated_spacing = curated_spacing)
-  
-  img_sitk, img_exp_up, img_exp_dn = expand_sitk(img_sitk = img_sitk, 
-                                                 curated_size = curated_size,
-                                                 pad_value = -1024)
-  
-  img_sitk, img_crp_up, img_crp_dn = crop_sitk(img_sitk = img_sitk, curated_size = curated_size)
-  
-  # if the check on the CT fails, return
-  if not check_img(patient_id, img_sitk, curated_size, curated_spacing):
-    return
+  try:
+      # init SITK reader and writer, load the CT volume in a SITK object
+      nrrd_reader = sitk.ImageFileReader()
+      nrrd_writer = sitk.ImageFileWriter()
+      nrrd_reader.SetFileName(patients_data[patient_id][0])
+      img_sitk = nrrd_reader.Execute()
 
-  # save preprocessed CT volume  
-  nrrd_writer.SetFileName(os.path.join(curated_dir_path, patient_id + '_img.nrrd'))
-  nrrd_writer.SetUseCompression(True)
-  nrrd_writer.Execute(img_sitk)
 
-  # if the segmask is not available but export_png is set to True, export the CT quality control png
-  if export_png and not has_manual_seg:
-    plot_sitk(patient_id, img_sitk, qc_curated_dir_path)
+      # take care of the size/spacing difference - resample SITK image, expand/crop
+      img_sitk, curated_size = resample_sitk(img_sitk = img_sitk,
+                                             method = sitk.sitkLinear,
+                                             curated_spacing = curated_spacing)
 
-  # if the segmask *is* available
-  if has_manual_seg:
-    nrrd_reader.SetFileName(patients_data[patient_id][1])
-    msk_sitk = nrrd_reader.Execute()
-    
-    # preprocess the segmasks according to the CT preprocessing parameters
-    msk_sitk, curated_size = resample_sitk(img_sitk = msk_sitk,
-                                           method = sitk.sitkNearestNeighbor,
-                                           curated_spacing = curated_spacing)
-    
-    msk_sitk, msk_exp_up, msk_exp_dn = expand_sitk(img_sitk = msk_sitk,
-                                                   curated_size = curated_size,
-                                                   pad_value = 0,
-                                                   new_size_up = img_exp_up,
-                                                   new_size_down = img_exp_dn)
-    
-    msk_sitk, new_size_up, new_size_down = crop_sitk(img_sitk = msk_sitk,
+      img_sitk, img_exp_up, img_exp_dn = expand_sitk(img_sitk = img_sitk,
                                                      curated_size = curated_size,
-                                                     new_size_up = img_crp_up,
-                                                     new_size_down = img_crp_dn)
-    
-    # if the check on the CT and the mask fails, return
-    if not check_mask(patient_id, img_sitk, msk_sitk):
-      return
+                                                     pad_value = -1024)
 
-    # save preprocessed segmask volume
-    nrrd_writer.SetFileName(os.path.join(curated_dir_path, patient_id + '_msk.nrrd'))
-    nrrd_writer.SetUseCompression(True)
-    nrrd_writer.Execute(msk_sitk)
+      img_sitk, img_crp_up, img_crp_dn = crop_sitk(img_sitk = img_sitk, curated_size = curated_size)
 
-    # if export_png is set to True when the mask is available, export the quality control png with
-    # the segmentation mask overlayed
-    if export_png:
-      plot_sitk_msk(patient_id, img_sitk, msk_sitk, qc_curated_dir_path)
+      # if the check on the CT fails, return
+      if not check_img(patient_id, img_sitk, curated_size, curated_spacing):
+        return
 
+      # save preprocessed CT volume
+      nrrd_writer.SetFileName(os.path.join(curated_dir_path, patient_id + '_img.nrrd'))
+      nrrd_writer.SetUseCompression(True)
+      nrrd_writer.Execute(img_sitk)
+
+      # if the segmask is not available but export_png is set to True, export the CT quality control png
+      if export_png and not has_manual_seg:
+        plot_sitk(patient_id, img_sitk, qc_curated_dir_path)
+
+      # if the segmask *is* available
+      if has_manual_seg:
+        nrrd_reader.SetFileName(patients_data[patient_id][1])
+        msk_sitk = nrrd_reader.Execute()
+
+        # preprocess the segmasks according to the CT preprocessing parameters
+        msk_sitk, curated_size = resample_sitk(img_sitk = msk_sitk,
+                                               method = sitk.sitkNearestNeighbor,
+                                               curated_spacing = curated_spacing)
+
+        msk_sitk, msk_exp_up, msk_exp_dn = expand_sitk(img_sitk = msk_sitk,
+                                                       curated_size = curated_size,
+                                                       pad_value = 0,
+                                                       new_size_up = img_exp_up,
+                                                       new_size_down = img_exp_dn)
+
+        msk_sitk, new_size_up, new_size_down = crop_sitk(img_sitk = msk_sitk,
+                                                         curated_size = curated_size,
+                                                         new_size_up = img_crp_up,
+                                                         new_size_down = img_crp_dn)
+
+        # if the check on the CT and the mask fails, return
+        if not check_mask(patient_id, img_sitk, msk_sitk):
+          return
+
+        # save preprocessed segmask volume
+        nrrd_writer.SetFileName(os.path.join(curated_dir_path, patient_id + '_msk.nrrd'))
+        nrrd_writer.SetUseCompression(True)
+        nrrd_writer.Execute(msk_sitk)
+
+        # if export_png is set to True when the mask is available, export the quality control png with
+        # the segmentation mask overlayed
+        if export_png:
+          plot_sitk_msk(patient_id, img_sitk, msk_sitk, qc_curated_dir_path)
+  except:
+      print('Something wrong with %s, skip the case' % patient_id)
 
 ## ----------------------------------------
 ## ----------------------------------------
@@ -422,7 +423,6 @@ def export_data(raw_data_dir_path, curated_dir_path, qc_curated_dir_path,
   # if single core, then run core as one would normally do with a function
   if num_cores == 1:
     for patient_id in patients_data:
-
       run_core(curated_dir_path = curated_dir_path,
                qc_curated_dir_path = qc_curated_dir_path,
                export_png = export_png,

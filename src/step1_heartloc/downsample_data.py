@@ -191,103 +191,105 @@ def run_core(resampled_dir_path, crop_size, new_spacing, has_manual_seg, result_
                                     is stored (including the file name and extension)
   
   """
-
-  nrrd_reader = sitk.ImageFileReader()
-  patient_id = os.path.basename(img_file).replace('_img.nrrd', '')
-  img_out_file = os.path.join(resampled_dir_path, patient_id + '_img.nrrd')
-
-  print 'Processing patient', patient_id
-
-  # read the patient image data
   try:
-    nrrd_reader.SetFileName(img_file)
-    img_sitk = nrrd_reader.Execute()
-  except:
-    print 'EXCEPTION: Unable to read NRRD image file for patient', patient_id
-    return
+    nrrd_reader = sitk.ImageFileReader()
+    patient_id = os.path.basename(img_file).replace('_img.nrrd', '')
+    img_out_file = os.path.join(resampled_dir_path, patient_id + '_img.nrrd')
 
-  # downsample CT data
-  img_sitk, orig_size_img, orig_spacing_img = resample_sitk(data_sitk = img_sitk, 
-                                                            new_spacing = new_spacing,
-                                                            method = sitk.sitkLinear)
+    print 'Processing patient', patient_id
 
-  # resize (crop/pad) the resulting image to [crop_size, crop_size, crop_size]
-  img_sitk, final_size_img, final_spacing_img, size_diff_img = resize_sitk(data_sitk = img_sitk,
-                                                                           crop_size = crop_size,
-                                                                           pad_value = -1024)
-
-  # sanity checks on the size and spacing of the resulting image
-  if not (crop_size, crop_size, crop_size) == final_size_img:
-    print 'Wrong final IMG size', patient_id, final_size_img
-  if not (new_spacing, new_spacing, new_spacing) == final_spacing_img:
-    print 'Wrong final IMG spacing', patient_id, final_spacing_img
-
-  # if everything is all right, save the downsampled and resized CT image as *.nrrd
-  save_nrrd(data_sitk = img_sitk, outfile_path = img_out_file)
-
-  msk_file = ''
-
-  # if a manual segmentation is associated to the patient CT
-  if has_manual_seg:
-    # path to the mask file
-    msk_file = img_file.replace('img', 'msk')
-    
-    # if the mask file exists
-    if os.path.exists(msk_file):
-      
-      # sanity check - read the *.nrrd file for the mask 
-      try:
-        nrrd_reader.SetFileName(msk_file)
-        msk_sitk = nrrd_reader.Execute()
-      except Exception as e:
-        print 'EXCEPTION: Unable to read NRRD mask file for patient', patient_id, e
-        return
-
-      # downsample segmask data
-      msk_sitk, orig_size_mask, orig_spacing_mask = resample_sitk(data_sitk = msk_sitk,
-                                                                  new_spacing = new_spacing,
-                                                                  method = sitk.sitkNearestNeighbor)
-      
-      # resize (crop/pad) the resulting image to [crop_size, crop_size, crop_size]
-      msk_sitk, final_size_mask, final_spacing_mask, size_dif_mask = resize_sitk(data_sitk = msk_sitk,
-                                                                                 crop_size = crop_size,
-                                                                                 pad_value = 0)
-
-      # save such mask file
-      msk_out_file = os.path.join(resampled_dir_path, patient_id + '_msk.nrrd')
-      save_nrrd(data_sitk = msk_sitk, outfile_path = msk_out_file)
-
-      # FIXME: try-except instead of returns?
-      # sanity checks on the size and spacing of the original mask
-      if not tuple(np.round(orig_size_img, 1)) == tuple(np.round(orig_size_mask, 1)):
-        print 'Wrong original MSK size', patient_id, tuple(np.round(orig_size_img, 1)), tuple(np.round(orig_size_mask, 1))
-        return
-      if not tuple(np.round(orig_spacing_img, 1)) == tuple(np.round(orig_spacing_mask, 1)):
-        print 'Wrong original MSK spacing', patient_id, tuple(np.round(orig_spacing_img, 1)), tuple(np.round(orig_spacing_mask, 1))
-        return
-
-      # sanity checks on the size and spacing of the resulting mask
-      if not tuple(np.round(final_size_img, 1)) == tuple(np.round(final_size_mask, 1)):
-        print 'Wrong final MSK size', patient_id, tuple(np.round(final_size_img, 1)), tuple(np.round(final_size_mask, 1))
-        return
-      if not tuple(np.round(final_spacing_mask, 1)) == tuple(np.round(final_spacing_mask, 1)):
-        print 'Wrong final MSK spacing', patient_id, tuple(np.round(final_spacing_img, 1)), tuple(np.round(final_spacing_mask, 1))
-        return
-    # if the mask file does not exist (has_manual_seg == True, so it should), return
-    else:
-      print('WARNING: MSK file not found. Skipping', patient_id)
+    # read the patient image data
+    try:
+      nrrd_reader.SetFileName(img_file)
+      img_sitk = nrrd_reader.Execute()
+    except:
+      print 'EXCEPTION: Unable to read NRRD image file for patient', patient_id
       return
 
-  # populate the patient_id entry of result_dict (passed as a reference) with:
-  # - path to the location where the subject CT .*nrrd file to be processed is stored
-  # - path to the location where the subject segmask .*nrrd file to be processed is stored
-  # - size and spacing of the CT image (before downsampling) (list)
-  # - size and spacing of the CT image (after downsampling and cropping/padding) (list)
-  # - difference in size between the two images (list)
-  result_dict[patient_id] = [img_file, msk_file,
-                             orig_size_img, orig_spacing_img,
-                             final_size_img, final_spacing_img,
-                             size_diff_img]
+    # downsample CT data
+    img_sitk, orig_size_img, orig_spacing_img = resample_sitk(data_sitk = img_sitk,
+                                                              new_spacing = new_spacing,
+                                                              method = sitk.sitkLinear)
+
+    # resize (crop/pad) the resulting image to [crop_size, crop_size, crop_size]
+    img_sitk, final_size_img, final_spacing_img, size_diff_img = resize_sitk(data_sitk = img_sitk,
+                                                                             crop_size = crop_size,
+                                                                             pad_value = -1024)
+
+    # sanity checks on the size and spacing of the resulting image
+    if not (crop_size, crop_size, crop_size) == final_size_img:
+      print 'Wrong final IMG size', patient_id, final_size_img
+    if not (new_spacing, new_spacing, new_spacing) == final_spacing_img:
+      print 'Wrong final IMG spacing', patient_id, final_spacing_img
+
+    # if everything is all right, save the downsampled and resized CT image as *.nrrd
+    save_nrrd(data_sitk = img_sitk, outfile_path = img_out_file)
+
+    msk_file = ''
+
+    # if a manual segmentation is associated to the patient CT
+    if has_manual_seg:
+      # path to the mask file
+      msk_file = img_file.replace('img', 'msk')
+
+      # if the mask file exists
+      if os.path.exists(msk_file):
+
+        # sanity check - read the *.nrrd file for the mask
+        try:
+          nrrd_reader.SetFileName(msk_file)
+          msk_sitk = nrrd_reader.Execute()
+        except Exception as e:
+          print 'EXCEPTION: Unable to read NRRD mask file for patient', patient_id, e
+          return
+
+        # downsample segmask data
+        msk_sitk, orig_size_mask, orig_spacing_mask = resample_sitk(data_sitk = msk_sitk,
+                                                                    new_spacing = new_spacing,
+                                                                    method = sitk.sitkNearestNeighbor)
+
+        # resize (crop/pad) the resulting image to [crop_size, crop_size, crop_size]
+        msk_sitk, final_size_mask, final_spacing_mask, size_dif_mask = resize_sitk(data_sitk = msk_sitk,
+                                                                                   crop_size = crop_size,
+                                                                                   pad_value = 0)
+
+        # save such mask file
+        msk_out_file = os.path.join(resampled_dir_path, patient_id + '_msk.nrrd')
+        save_nrrd(data_sitk = msk_sitk, outfile_path = msk_out_file)
+
+        # FIXME: try-except instead of returns?
+        # sanity checks on the size and spacing of the original mask
+        if not tuple(np.round(orig_size_img, 1)) == tuple(np.round(orig_size_mask, 1)):
+          print 'Wrong original MSK size', patient_id, tuple(np.round(orig_size_img, 1)), tuple(np.round(orig_size_mask, 1))
+          return
+        if not tuple(np.round(orig_spacing_img, 1)) == tuple(np.round(orig_spacing_mask, 1)):
+          print 'Wrong original MSK spacing', patient_id, tuple(np.round(orig_spacing_img, 1)), tuple(np.round(orig_spacing_mask, 1))
+          return
+
+        # sanity checks on the size and spacing of the resulting mask
+        if not tuple(np.round(final_size_img, 1)) == tuple(np.round(final_size_mask, 1)):
+          print 'Wrong final MSK size', patient_id, tuple(np.round(final_size_img, 1)), tuple(np.round(final_size_mask, 1))
+          return
+        if not tuple(np.round(final_spacing_mask, 1)) == tuple(np.round(final_spacing_mask, 1)):
+          print 'Wrong final MSK spacing', patient_id, tuple(np.round(final_spacing_img, 1)), tuple(np.round(final_spacing_mask, 1))
+          return
+      # if the mask file does not exist (has_manual_seg == True, so it should), return
+      else:
+        print('WARNING: MSK file not found. Skipping', patient_id)
+        return
+
+    # populate the patient_id entry of result_dict (passed as a reference) with:
+    # - path to the location where the subject CT .*nrrd file to be processed is stored
+    # - path to the location where the subject segmask .*nrrd file to be processed is stored
+    # - size and spacing of the CT image (before downsampling) (list)
+    # - size and spacing of the CT image (after downsampling and cropping/padding) (list)
+    # - difference in size between the two images (list)
+    result_dict[patient_id] = [img_file, msk_file,
+                               orig_size_img, orig_spacing_img,
+                               final_size_img, final_spacing_img,
+                               size_diff_img]
+  except:
+    print('Something wrong with %s, skip the case' % patient_id)
 
 
 ## ----------------------------------------
