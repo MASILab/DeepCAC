@@ -221,6 +221,7 @@ def load_attributes_from_hdf5_group(group, name):
 
 def check_stage1_h5_structure():
     in_h5 = '/nfs/masi/xuk9/src/DeepCAC/data/step1_heartloc/model_weights/step1_heartloc_model_weights.updated.hdf5'
+    # in_h5 = '/nfs/masi/xuk9/src/DeepCAC/data/step1_heartloc/model_weights/step1_heartloc_model_weights.hdf5.bak'
 
     crop_size = 112
     model_down_steps = 4
@@ -596,7 +597,7 @@ def _convert_rnn_weights(layer, weights):
 if __name__ == '__main__':
     # convert_stage1_h5()
     # convert_stage2_h5()
-    convert_stage3_h5()
+    # convert_stage3_h5()
 
-    # check_stage1_h5_structure()
+    check_stage1_h5_structure()
 

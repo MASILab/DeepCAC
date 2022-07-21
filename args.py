@@ -17,7 +17,7 @@ def get_default_conf_dict(step):
                 'has_manual_seg': False,
                 'fill_mask_holes': True,
                 'export_png': True,
-                'num_cores': 1,
+                'num_cores': 4,
                 'create_test_set': 'All',
                 'curated_size': [512, 512, 0],
                 'curated_spacing': [0.68, 0.68, 2.5],
@@ -25,7 +25,7 @@ def get_default_conf_dict(step):
                 'model_input_spacing': 3.0
             },
             'model': {
-                'model_check_point': '/nfs/masi/xuk9/Projects/ThoraxLevelBCA/DeepCAC/models/step1_heartloc_model_weights.hdf5',
+                'model_check_point': '/nfs/masi/xuk9/Projects/DeepCAC/models/step1_heartloc_model_weights.hdf5',
                 'pool_size': [2, 2, 2],
                 'conv_size': [3, 3, 3],
                 'down_steps': 4,
@@ -53,7 +53,7 @@ def get_default_conf_dict(step):
                 'has_manual_seg': False,
                 'fill_mask_holes': True,
                 'export_png': True,
-                'num_cores': 1,
+                'num_cores': 4,
                 'use_inferred_masks': True,
                 'curated_size': [512, 512, 0],
                 'curated_spacing': [0.68, 0.68, 2.5],
@@ -63,7 +63,7 @@ def get_default_conf_dict(step):
                 'final_spacing': [0, 0, 2.5]
             },
             'model': {
-                'model_check_point': '/nfs/masi/xuk9/Projects/ThoraxLevelBCA/DeepCAC/models/step2_heartseg_model_weights.hdf5',
+                'model_check_point': '/nfs/masi/xuk9/Projects/DeepCAC/models/step2_heartseg_model_weights.hdf5',
                 'pool_size': [2, 2, 2],
                 'conv_size': [3, 3, 3],
                 'down_steps': 4,
@@ -90,12 +90,12 @@ def get_default_conf_dict(step):
                 'has_manual_seg': False,
                 'export_png': True,
                 'export_cac_slices_png': True,
-                'num_cores': 1,
+                'num_cores': 4,
                 'use_inferred_masks': True,
                 'patch_size': [32, 48, 48]
             },
             'model': {
-                'model_check_point': '/nfs/masi/xuk9/Projects/ThoraxLevelBCA/DeepCAC/models/'
+                'model_check_point': '/nfs/masi/xuk9/Projects/DeepCAC/models/'
                                      'step3_cacseg_model_weights.hdf5',
             }
         }
@@ -113,6 +113,6 @@ def get_default_conf_dict(step):
             },
             'processing': {
                 'has_manual_seg': False,
-                'num_cores': 1
+                'num_cores': 4
             }
         }

@@ -1,4 +1,5 @@
 import SimpleITK as sitk
+import tensorflow as tf
 
 
 def load_vlsp_case():
