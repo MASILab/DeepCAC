@@ -20,6 +20,7 @@ from glob import glob
 from scipy.spatial import distance
 from multiprocessing import Manager
 from functools import partial
+from tqdm import tqdm
 
 
 def get_files_for_patient(patients_dict, pred_dir, img_file, has_manual_seg, run):

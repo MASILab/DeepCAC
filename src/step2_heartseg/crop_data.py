@@ -70,6 +70,16 @@ def cropSitk(patient_id, patient, imagesRawSitk, inter_size):
                oldSize[1]-inter_size[1]-newSizeDown[1],
                oldSize[2]-inter_size[2]-newSizeDown[2]]
 
+  # Check the type of newSizeUp and newSizeDown
+  # These arrays cannot be negative
+  for val in newSizeUp + newSizeDown:
+    if val < 0:
+      print('Find negative value in newSizeUp')
+      raise IOError
+    if not (type(val) == int):
+      print('Non int type in newSizeUp')
+      raise IOError
+
   cropFilter = sitk.CropImageFilter()
   cropFilter.SetUpperBoundaryCropSize(newSizeUp)
   cropFilter.SetLowerBoundaryCropSize(newSizeDown)
@@ -178,10 +188,15 @@ def runCore(patients, output_dir, diff_dict, final_size, final_spacing, inter_si
   imgFile = os.path.join(output_dir, patient_id + '_img.nrrd')
   imagesRawSitk = {}
 
-  imagesRawSitk = getPatientFiles(patient, imagesRawSitk)
-  imagesRawSitk, expSize, sizeDifExpand, NSDexpt, NSUexp = expandSitk(imagesRawSitk, inter_size)
-  imagesRawSitk, cropSize, sizeDifCrop, NSD_crop, NSUcrop = cropSitk(patient_id, patient, imagesRawSitk, inter_size)
-  imagesRawSitk = downsampleSitk(imagesRawSitk, final_spacing, final_size)
+  try:
+    imagesRawSitk = getPatientFiles(patient, imagesRawSitk)
+    imagesRawSitk, expSize, sizeDifExpand, NSDexpt, NSUexp = expandSitk(imagesRawSitk, inter_size)
+    imagesRawSitk, cropSize, sizeDifCrop, NSD_crop, NSUcrop = cropSitk(patient_id, patient, imagesRawSitk, inter_size)
+    imagesRawSitk = downsampleSitk(imagesRawSitk, final_spacing, final_size)
+
+  except:
+    print('Cannot process {:s}'.format(patient_id))
+    return
 
   if not check_images(patient_id, imagesRawSitk, final_size, final_spacing):
     return
