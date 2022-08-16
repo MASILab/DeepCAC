@@ -25,7 +25,7 @@ def get_default_conf_dict(step):
                 'model_input_spacing': 3.0
             },
             'model': {
-                'model_check_point': '/nfs/masi/xuk9/Projects/DeepCAC/models/step1_heartloc_model_weights.hdf5',
+                'model_check_point': '/local_storage/xuk9/Projects/DeepCAC/models/step1_heartloc_model_weights.hdf5',
                 'pool_size': [2, 2, 2],
                 'conv_size': [3, 3, 3],
                 'down_steps': 4,
@@ -63,7 +63,7 @@ def get_default_conf_dict(step):
                 'final_spacing': [0, 0, 2.5]
             },
             'model': {
-                'model_check_point': '/nfs/masi/xuk9/Projects/DeepCAC/models/step2_heartseg_model_weights.hdf5',
+                'model_check_point': '/local_storage/xuk9/Projects/DeepCAC/models/step2_heartseg_model_weights.hdf5',
                 'pool_size': [2, 2, 2],
                 'conv_size': [3, 3, 3],
                 'down_steps': 4,
@@ -95,7 +95,7 @@ def get_default_conf_dict(step):
                 'patch_size': [32, 48, 48]
             },
             'model': {
-                'model_check_point': '/nfs/masi/xuk9/Projects/DeepCAC/models/'
+                'model_check_point': '/local_storage/xuk9/Projects/DeepCAC/models/'
                                      'step3_cacseg_model_weights.hdf5',
             }
         }

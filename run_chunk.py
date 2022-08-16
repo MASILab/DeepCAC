@@ -12,7 +12,7 @@ if __name__ == '__main__':
     parser.add_argument('--chunk-root', required=True)
     args = parser.parse_args()
 
-    n_proc = 10
+    n_proc = 30
     chunk_root = args.chunk_root
 
     print('Process chunk {:s}'.format(chunk_root))
@@ -24,8 +24,8 @@ if __name__ == '__main__':
         step_conf['processing']['num_cores'] = n_proc
         conf_dict[step] = step_conf
 
-    # input_scan_postfix = '.nii.gz'
-    input_scan_postfix = '.nrrd'
+    input_scan_postfix = '.nii.gz'
+    # input_scan_postfix = '.nrrd'
     conf_dict['step1']['io']['input_scan_postfix'] = input_scan_postfix
 
     run_step1(conf_dict['step1'])
@@ -34,8 +34,8 @@ if __name__ == '__main__':
     run_step4(conf_dict['step4'])
 
     # Need to clean up the space after this
-    # for sub_dir in ['step1_heartloc', 'step2_heartseg', 'step3_cacseg']:
-    #     step_dir = os.path.join(chunk_root, sub_dir)
-    #     rm_cmd = 'rm -rf {:s}'.format(step_dir)
-    #     os.system(rm_cmd)
+    for sub_dir in ['step1_heartloc', 'step2_heartseg', 'step3_cacseg']:
+        step_dir = os.path.join(chunk_root, sub_dir)
+        rm_cmd = 'rm -rf {:s}'.format(step_dir)
+        os.system(rm_cmd)
 
