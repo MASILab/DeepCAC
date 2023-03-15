@@ -230,6 +230,29 @@ def check_mask(patient_id, img_sitk, msk_sitk):
 ## ----------------------------------------
 ## ----------------------------------------
 
+#In this case, the x,y,z represents axial, coronal and sagittal. Need to make those changes.
+def clip_LPS(img, xyz):
+    x, y, z = xyz
+    clip_sag = img[x, :, :]
+    clip_sag = np.rot90(clip_sag)
+    clip_cor = img[:, y, :]
+    clip_cor = np.rot90(clip_cor)
+    clip_ax = img[:, :, z]
+    clip_ax = np.flip(clip_ax, 0)
+    clip_ax = np.rot90(clip_ax, 3)
+    return (clip_sag, clip_cor, clip_ax)
+
+def clip_LAS(img, xyz):
+    x, y , z = xyz
+    clip_sag = img[x, :, :]
+    clip_sag = np.flip(clip_sag, 0)
+    clip_sag = np.rot90(clip_sag)
+    clip_cor = img[:, y, :]
+    clip_cor = np.rot90(clip_cor)
+    clip_ax = img[:, :, z]
+    clip_ax = np.rot90(clip_ax)
+    return (clip_sag, clip_cor, clip_ax)
+
 def plot_sitk(patient_id, img_sitk, qc_curated_dir_path):
   
   """
@@ -245,11 +268,16 @@ def plot_sitk(patient_id, img_sitk, qc_curated_dir_path):
   
   png_file = os.path.join(qc_curated_dir_path, patient_id + 'img.png')
   img_cube = sitk.GetArrayFromImage(img_sitk)
+  sag,cor,axi = clip_LAS(img = img_cube, xyz=(int(img_cube.shape[0]/2), int(img_cube.shape[1]/2), int(img_cube.shape[2]/2))) #2 is sagittal, 1 is coronal and 0 is axial.
 
   fig, ax = plt.subplots(1, 3, figsize = (32, 8))
-  ax[0].imshow(img_cube[int(img_cube.shape[0]/2), :, :], cmap = 'gray')
-  ax[1].imshow(img_cube[:, int(img_cube.shape[1]/2), :], cmap = 'gray')
-  ax[2].imshow(img_cube[:, :, int(img_cube.shape[2]/2)], cmap = 'gray')
+  #This is the original orientation and code
+  #ax[0].imshow(img_cube[int(img_cube.shape[0]/2), :, :], cmap = 'gray') #Axial view
+  #ax[1].imshow(img_cube[:, int(img_cube.shape[1]/2), :], cmap = 'gray') #Coronal view
+  #ax[2].imshow(img_cube[:, :, int(img_cube.shape[2]/2)], cmap = 'gray') #Sagittal view
+  ax[2].imshow(axi, cmap = 'gray')
+  ax[1].imshow(cor, cmap = 'gray')
+  ax[0].imshow(sag, cmap = 'gray')
 
   plt.savefig(png_file, bbox_inches = 'tight')
   plt.close(fig)
