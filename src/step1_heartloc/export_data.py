@@ -279,9 +279,16 @@ def plot_sitk(patient_id, img_sitk, qc_curated_dir_path):
   #ax[0].imshow(img_cube[int(img_cube.shape[0]/2), :, :], cmap = 'gray') #Axial view
   #ax[1].imshow(img_cube[:, int(img_cube.shape[1]/2), :], cmap = 'gray') #Coronal view
   #ax[2].imshow(img_cube[:, :, int(img_cube.shape[2]/2)], cmap = 'gray') #Sagittal view
-  ax[2].imshow(axi, cmap = 'gray')
-  ax[1].imshow(cor, cmap = 'gray')
-  ax[0].imshow(sag, cmap = 'gray')
+  clip_range = (-1024,500)
+  if len(clip_range) > 0:
+      vmin = clip_range[0]
+      vmax = clip_range[1]
+  else:
+      vmax = np.max(new_img)
+      vmin = np.min(new_img)
+  ax[2].imshow(axi, cmap = 'gray', vmin=vmin, vmax=vmax)
+  ax[1].imshow(cor, cmap = 'gray', vmin=vmin, vmax=vmax)
+  ax[0].imshow(sag, cmap = 'gray', vmin=vmin, vmax=vmax)
 
   plt.savefig(png_file, bbox_inches = 'tight')
   plt.close(fig)
