@@ -230,7 +230,7 @@ def check_mask(patient_id, img_sitk, msk_sitk):
 ## ----------------------------------------
 ## ----------------------------------------
 
-#In this case, the x,y,z represents axial, coronal and sagittal. Need to make those changes.
+#In this case, the x,y,z represents axial, coronal and sagittal. Need to make those changes. (Swapped axis and changed orientation)
 def clip_LPS(img, xyz):
     x, y, z = xyz
     clip_sag = img[x, :, :]
@@ -268,7 +268,11 @@ def plot_sitk(patient_id, img_sitk, qc_curated_dir_path):
   
   png_file = os.path.join(qc_curated_dir_path, patient_id + 'img.png')
   img_cube = sitk.GetArrayFromImage(img_sitk)
-  sag,cor,axi = clip_LAS(img = img_cube, xyz=(int(img_cube.shape[0]/2), int(img_cube.shape[1]/2), int(img_cube.shape[2]/2))) #2 is sagittal, 1 is coronal and 0 is axial.
+  #img_cube = np.swapaxes(img_cube, img_cube.shape[0], img_cube.shape[2])
+  print(img_cube.shape)
+  new_img = np.swapaxes(img_cube, 0, 2)
+  print(new_img.shape)
+  sag,cor,axi = clip_LAS(img = new_img, xyz=(int(new_img.shape[0]/2), int(new_img.shape[1]/2), int(new_img.shape[2]/2))) #2 is sagittal, 1 is coronal and 0 is axial.
 
   fig, ax = plt.subplots(1, 3, figsize = (32, 8))
   #This is the original orientation and code
@@ -353,12 +357,12 @@ def run_core(curated_dir_path, qc_curated_dir_path, export_png,
 
       # take care of the size/spacing difference - resample SITK image, expand/crop
       img_sitk, curated_size = resample_sitk(img_sitk = img_sitk,
-                                             method = sitk.sitkLinear,
-                                             curated_spacing = curated_spacing)
+                                              method = sitk.sitkLinear,
+                                              curated_spacing = curated_spacing)
 
       img_sitk, img_exp_up, img_exp_dn = expand_sitk(img_sitk = img_sitk,
-                                                     curated_size = curated_size,
-                                                     pad_value = -1024)
+                                                      curated_size = curated_size,
+                                                      pad_value = -1024)
 
       img_sitk, img_crp_up, img_crp_dn = crop_sitk(img_sitk = img_sitk, curated_size = curated_size)
 
@@ -382,19 +386,19 @@ def run_core(curated_dir_path, qc_curated_dir_path, export_png,
 
         # preprocess the segmasks according to the CT preprocessing parameters
         msk_sitk, curated_size = resample_sitk(img_sitk = msk_sitk,
-                                               method = sitk.sitkNearestNeighbor,
-                                               curated_spacing = curated_spacing)
+                                                method = sitk.sitkNearestNeighbor,
+                                                curated_spacing = curated_spacing)
 
         msk_sitk, msk_exp_up, msk_exp_dn = expand_sitk(img_sitk = msk_sitk,
-                                                       curated_size = curated_size,
-                                                       pad_value = 0,
-                                                       new_size_up = img_exp_up,
-                                                       new_size_down = img_exp_dn)
+                                                        curated_size = curated_size,
+                                                        pad_value = 0,
+                                                        new_size_up = img_exp_up,
+                                                        new_size_down = img_exp_dn)
 
         msk_sitk, new_size_up, new_size_down = crop_sitk(img_sitk = msk_sitk,
-                                                         curated_size = curated_size,
-                                                         new_size_up = img_crp_up,
-                                                         new_size_down = img_crp_dn)
+                                                          curated_size = curated_size,
+                                                          new_size_up = img_crp_up,
+                                                          new_size_down = img_crp_dn)
 
         # if the check on the CT and the mask fails, return
         if not check_mask(patient_id, img_sitk, msk_sitk):
