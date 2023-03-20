@@ -170,7 +170,9 @@ def write_data_file(data_dir, data_file, file_list, cube_length, input_spacing, 
                                    offset:offset + cube_length])
     
     # normalise intensity values between 0 (+ eps) and 1
-    img_cropped = ((np.clip(img_cropped, -1024.0, 3071.0)) - 1023.5) / 2047.5
+    #img_cropped = ((np.clip(img_cropped, -1024.0, 3071.0)) - 1023.5) / 2047.5
+
+    img_cropped = ((np.clip(img_cropped, -1024.0, 500)) - 1023.5) / 2047.5
     
     # store ID as a node in the HDF5 vector
     # pat_id_hdf5.append(np.array([pat_id], dtype='S65'))
