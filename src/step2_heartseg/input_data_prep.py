@@ -69,7 +69,8 @@ def write_data_file(dataDir, dataFile, fileList, fill_holes, cube_size):
     else:
       mskCube = np.zeros(imgCube.shape)
 
-    imgCube = ((np.clip(imgCube, -1024.0, 3071.0)) - 1023.5) / 2047.5
+    # imgCube = ((np.clip(imgCube, -1024.0, 3071.0)) - 1023.5) / 2047.5
+    imgCube = ((np.clip(imgCube, -1024.0, 500)) - 1023.5) / 2047.5
     mskCube[mskCube == 2] = 0
     mskCube[mskCube > 0] = 1
 
