@@ -21,20 +21,31 @@ import matplotlib.pyplot as plt
 import SimpleITK as sitk
 from glob import glob
 from functools import partial
+from src.step1_heartloc.export_data import clip_LAS
 
 
 def save_png(patient_id, img_RAW_croped_cube, msk_RAW_croped_cube, png_output):
+  # size = img_RAW_croped_cube.shape
+  img_RAW_croped_cube = np.swapaxes(img_RAW_croped_cube,0,2)
+  msk_RAW_croped_cube = np.swapaxes(msk_RAW_croped_cube,0,2)
   size = img_RAW_croped_cube.shape
+  sag,cor,axi = clip_LAS(img_RAW_croped_cube, xyz = (int(size[0]/2), int(size[1]/2), int(size[2]/2)))
 
-  fig, ax = plt.subplots(2, 3, figsize=(32, 16))
+  # fig, ax = plt.subplots(2, 3, figsize=(32, 16))
+  fig, ax = plt.subplots(1, 3, figsize=(32, 16))
 
-  ax[0, 0].imshow(img_RAW_croped_cube[int(size[0] / 2), :, :], cmap='gray')
-  ax[0, 1].imshow(img_RAW_croped_cube[:, int(size[1] / 2), :], cmap='gray')
-  ax[0, 2].imshow(img_RAW_croped_cube[:, :, int(size[2] / 2)], cmap='gray')
+  # ax[0, 0].imshow(img_RAW_croped_cube[int(size[0] / 2), :, :], cmap='gray')
+  # ax[0, 1].imshow(img_RAW_croped_cube[:, int(size[1] / 2), :], cmap='gray')
+  # ax[0, 2].imshow(img_RAW_croped_cube[:, :, int(size[2] / 2)], cmap='gray')
 
-  ax[1, 0].imshow(msk_RAW_croped_cube[int(size[0] / 2), :, :], cmap='gray')
-  ax[1, 1].imshow(msk_RAW_croped_cube[:, int(size[1] / 2), :], cmap='gray')
-  ax[1, 2].imshow(msk_RAW_croped_cube[:, :, int(size[2] / 2)], cmap='gray')
+  ax[0].imshow(sag, cmap='gray')
+  ax[1].imshow(cor, cmap='gray')
+  ax[2].imshow(axi, cmap='gray')
+
+  #No manual masks available therefore commenting the code out
+  # ax[1, 0].imshow(msk_RAW_croped_cube[int(size[0] / 2), :, :], cmap='gray')
+  # ax[1, 1].imshow(msk_RAW_croped_cube[:, int(size[1] / 2), :], cmap='gray')
+  # ax[1, 2].imshow(msk_RAW_croped_cube[:, :, int(size[2] / 2)], cmap='gray')
 
   fileName = os.path.join(png_output, (str(patient_id) + ".png"))
   plt.savefig(fileName)
