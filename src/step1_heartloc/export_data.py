@@ -269,35 +269,38 @@ def plot_sitk(patient_id, img_sitk, qc_curated_dir_path):
   png_file = os.path.join(qc_curated_dir_path, patient_id + 'img.png')
   img_cube = sitk.GetArrayFromImage(img_sitk)
   img = sitk.GetImageFromArray(img_cube)
-  img_space = img_sitk.GetSpacing() #obtaining the voxel size from the image
-  svox = img_space[0]
-  cvox = img_space[1]
-  avox = img_space[2]
-  #img_cube = np.swapaxes(img_cube, img_cube.shape[0], img_cube.shape[2])
-  print(img_cube.shape)
-  new_img = np.swapaxes(img_cube, 0, 2)
-  print(new_img.shape)
-  sag,cor,axi = clip_LAS(img = new_img, xyz=(int(new_img.shape[0]/2), int(new_img.shape[1]/2), int(new_img.shape[2]/2)))
+  # img_space = img_sitk.GetSpacing() #obtaining the voxel size from the image
+  # svox = img_space[0]
+  # cvox = img_space[1]
+  # avox = img_space[2]
+  #print(img_cube.shape)
+  # new_img = np.swapaxes(img_cube, 0, 2)
+  #print(new_img.shape)
+  # sag,cor,axi = clip_LAS(img = new_img, xyz=(int(new_img.shape[0]/2), int(new_img.shape[1]/2), int(new_img.shape[2]/2)))
 
   fig, ax = plt.subplots(1, 3, figsize = (32, 8))
   #This is the original orientation and code
-  #ax[0].imshow(img_cube[int(img_cube.shape[0]/2), :, :], cmap = 'gray') #Axial view
-  #ax[1].imshow(img_cube[:, int(img_cube.shape[1]/2), :], cmap = 'gray') #Coronal view
-  #ax[2].imshow(img_cube[:, :, int(img_cube.shape[2]/2)], cmap = 'gray') #Sagittal view
-  clip_range = (-1024,500)
-  if len(clip_range) > 0:
-      vmin = clip_range[0]
-      vmax = clip_range[1]
-  else:
-      vmax = np.max(new_img)
-      vmin = np.min(new_img)
-  ax[2].imshow(axi, cmap = 'gray', vmin=vmin, vmax=vmax)
-  ax[1].imshow(cor, cmap = 'gray', vmin=vmin, vmax=vmax)
-  ax[1].set_aspect(avox / svox)
-  ax[0].imshow(sag, cmap = 'gray', vmin=vmin, vmax=vmax)
-  ax[0].set_aspect(avox / cvox)
-  plt.savefig(png_file, bbox_inches = 'tight')
+  ax[0].imshow(img_cube[int(img_cube.shape[0]/2), :, :], cmap = 'gray') #Axial view
+  ax[1].imshow(img_cube[:, int(img_cube.shape[1]/2), :], cmap = 'gray') #Coronal view
+  ax[2].imshow(img_cube[:, :, int(img_cube.shape[2]/2)], cmap = 'gray') #Sagittal view
+  plt.savefig(png_file, bbox_inches='tight')
   plt.close(fig)
+
+
+  #Additional code
+  # clip_range = (-1024,500)
+  # if len(clip_range) > 0:
+  #     vmin = clip_range[0]
+  #     vmax = clip_range[1]
+  # else:
+  #     vmax = np.max(new_img)
+  #     vmin = np.min(new_img)
+  # ax[2].imshow(axi, cmap = 'gray', vmin=vmin, vmax=vmax)
+  # ax[1].imshow(cor, cmap = 'gray', vmin=vmin, vmax=vmax)
+  # ax[1].set_aspect(avox / svox)
+  # ax[0].imshow(sag, cmap = 'gray', vmin=vmin, vmax=vmax)
+  # #ax[0].set_aspect(avox / cvox)
+
 
 
 ## ----------------------------------------
