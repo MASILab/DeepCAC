@@ -21,8 +21,8 @@ from src.step1_heartloc.export_data import clip_LAS
 
 def save_png(patientID, output_dir_png, img, msk, pred):
   maskIndicesMsk = np.where(msk != 0)
-  img = np.swapaxes(img, 0, 2)
-  sag, cor, axi = clip_LAS(img, xyz=(int(img.shape[0] / 2), int(img.shape[1] / 2), int(img.shape[2] / 2)))
+  #img = np.swapaxes(img, 0, 2)
+  #sag, cor, axi = clip_LAS(img, xyz=(int(img.shape[0] / 2), int(img.shape[1] / 2), int(img.shape[2] / 2)))
   if len(maskIndicesMsk) == 0:
     trueBB = [np.min(maskIndicesMsk[0]), np.max(maskIndicesMsk[0]),
               np.min(maskIndicesMsk[1]), np.max(maskIndicesMsk[1]),
@@ -36,16 +36,16 @@ def save_png(patientID, output_dir_png, img, msk, pred):
   pred[pred > 0.5] = 1
   pred[pred < 1] = 0
 
-  pred = np.swapaxes(pred,0,2)
-  ps,pc,pa = clip_LAS(pred, xyz = (cen[0],cen[1],cen[2]))
+  # pred = np.swapaxes(pred,0,2)
+  # ps,pc,pa = clip_LAS(pred, xyz = (cen[0],cen[1],cen[2]))
 
   fig, ax = plt.subplots(2, 3, figsize=(32, 16))
-  # ax[0, 0].imshow(img[cen[0], :, :], cmap='gray')
-  # ax[0, 1].imshow(img[:, cen[1], :], cmap='gray')
-  # ax[0, 2].imshow(img[:, :, cen[2]], cmap='gray')
-  ax[0, 0].imshow(sag, cmap='gray')
-  ax[0, 1].imshow(cor, cmap='gray')
-  ax[0, 2].imshow(axi, cmap='gray')
+  ax[0, 0].imshow(img[cen[0], :, :], cmap='gray')
+  ax[0, 1].imshow(img[:, cen[1], :], cmap='gray')
+  ax[0, 2].imshow(img[:, :, cen[2]], cmap='gray')
+  # ax[0, 0].imshow(sag, cmap='gray')
+  # ax[0, 1].imshow(cor, cmap='gray')
+  # ax[0, 2].imshow(axi, cmap='gray')
 
   ax[0, 0].imshow(msk[cen[0], :, :], cmap='jet', alpha=0.4)
   ax[0, 1].imshow(msk[:, cen[1], :], cmap='jet', alpha=0.4)
@@ -55,17 +55,17 @@ def save_png(patientID, output_dir_png, img, msk, pred):
   # ax[1, 1].imshow(img[:, cen[1], :], cmap='gray')
   # ax[1, 2].imshow(img[:, :, cen[2]], cmap='gray')
 
-  ax[1, 0].imshow(sag, cmap='gray')
-  ax[1, 1].imshow(cor, cmap='gray')
-  ax[1, 2].imshow(axi, cmap='gray')
+  # ax[1, 0].imshow(sag, cmap='gray')
+  # ax[1, 1].imshow(cor, cmap='gray')
+  # ax[1, 2].imshow(axi, cmap='gray')
 
-  # ax[1, 0].imshow(pred[cen[0], :, :], cmap='jet', alpha=0.4)
-  # ax[1, 1].imshow(pred[:, cen[1], :], cmap='jet', alpha=0.4)
-  # ax[1, 2].imshow(pred[:, :, cen[2]], cmap='jet', alpha=0.4)
+  ax[1, 0].imshow(pred[cen[0], :, :], cmap='jet', alpha=0.4)
+  ax[1, 1].imshow(pred[:, cen[1], :], cmap='jet', alpha=0.4)
+  ax[1, 2].imshow(pred[:, :, cen[2]], cmap='jet', alpha=0.4)
 
-  ax[1, 0].imshow(ps, cmap='jet', alpha=0.4)
-  ax[1, 1].imshow(pc, cmap='jet', alpha=0.4)
-  ax[1, 2].imshow(pa, cmap='jet', alpha=0.4)
+  # ax[1, 0].imshow(ps, cmap='jet', alpha=0.4)
+  # ax[1, 1].imshow(pc, cmap='jet', alpha=0.4)
+  # ax[1, 2].imshow(pa, cmap='jet', alpha=0.4)
 
   fileName = os.path.join(output_dir_png, patientID + '_' + ".png")
   plt.savefig(fileName)
