@@ -51,9 +51,9 @@ def save_png(patientID, output_dir_png, img, msk, pred):
   ax[0, 1].imshow(msk[:, cen[1], :], cmap='jet', alpha=0.4)
   ax[0, 2].imshow(msk[:, :, cen[2]], cmap='jet', alpha=0.4)
 
-  # ax[1, 0].imshow(img[cen[0], :, :], cmap='gray')
-  # ax[1, 1].imshow(img[:, cen[1], :], cmap='gray')
-  # ax[1, 2].imshow(img[:, :, cen[2]], cmap='gray')
+  ax[1, 0].imshow(img[cen[0], :, :], cmap='gray')
+  ax[1, 1].imshow(img[:, cen[1], :], cmap='gray')
+  ax[1, 2].imshow(img[:, :, cen[2]], cmap='gray')
 
   # ax[1, 0].imshow(sag, cmap='gray')
   # ax[1, 1].imshow(cor, cmap='gray')
