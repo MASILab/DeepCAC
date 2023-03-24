@@ -26,13 +26,7 @@ from src.step1_heartloc.export_data import clip_LAS
 
 def save_png(patient_id, img_RAW_croped_cube, msk_RAW_croped_cube, png_output):
   size = img_RAW_croped_cube.shape
-  # itk_img = sitk.GetImageFromArray(img_RAW_croped_cube)
-  # itk_arr = sitk.GetArrayFromImage(itk_img)
-  # itk_img.SetSpacing([0.68,0.68,2.5])
-  # space = itk_img.GetSpacing()
-  # sag_space = space[0]
-  # cor_space = space[1]
-  # ax_space = space[2]
+
 
   # Additonal code
   # img_RAW_croped_cube = np.swapaxes(img_RAW_croped_cube,0,2)
@@ -40,8 +34,8 @@ def save_png(patient_id, img_RAW_croped_cube, msk_RAW_croped_cube, png_output):
   # size = img_RAW_croped_cube.shape
   # sag,cor,axi = clip_LAS(img_RAW_croped_cube, xyz = (int(size[0]/2), int(size[1]/2), int(size[2]/2)))
 
-  # fig, ax = plt.subplots(2, 3, figsize=(32, 16))
-  fig, ax = plt.subplots(1, 3, figsize=(32, 16))
+  fig, ax = plt.subplots(2, 3, figsize=(32, 16))
+  #fig, ax = plt.subplots(1, 3, figsize=(32, 16)) #This is the updated version of the pipeline.
 
   ax[0, 0].imshow(img_RAW_croped_cube[int(size[0] / 2), :, :], cmap='gray')
   ax[0, 1].imshow(img_RAW_croped_cube[:, int(size[1] / 2), :], cmap='gray')
