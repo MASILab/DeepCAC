@@ -105,42 +105,43 @@ def assemble(img, prd, n_x, n_y, n_z, cube_size):
 ## ----------------------------------------
 
 def export_png(patient_id, img, msk, prd, th, output_dir_png):
-  prd = np.swapaxes(prd,0,2)
-  img = np.swapaxes(img,0,2)
-  msk = np.swapaxes(msk,0,2)
-
-  slc_rng = int(img.shape[2])
+  # prd = np.swapaxes(prd,0,2)
+  # img = np.swapaxes(img,0,2)
+  # msk = np.swapaxes(msk,0,2)
+  #
+  # slc_rng = int(img.shape[2])
   #print(len(img)) #Looping through axial slice to depict CAC.
   prd[prd>th] = 1
   prd[prd<=th] = 0
 
-  # for z in range(len(img)):
-  #   #Original code
-  #   if np.sum(msk[z,:,:]) > 0 or np.sum(prd[z,:,:]) > 0:
-  #     fig, ax = plt.subplots(1, 2, figsize=(32, 32))
-  #
-  #     ax[0].imshow(img[z,:,:], cmap='gray')
-  #     ax[0].imshow(msk[z,:,:], cmap='jet', alpha=0.4)
-  #
-  #     ax[1].imshow(img[z,:,:], cmap='gray')
-  #     ax[1].imshow(prd[z,:,:], cmap='jet', alpha=0.4)
-
-  for z in range(slc_rng):
-    if np.sum(msk[:, :, z]) > 0 or np.sum(prd[:, :, z]) > 0:
+  for z in range(len(img)):
+    #Original code
+    if np.sum(msk[z,:,:]) > 0 or np.sum(prd[z,:,:]) > 0:
       fig, ax = plt.subplots(1, 2, figsize=(32, 32))
-      si,ci,axi = clip_LAS(img,xyz=(int(img.shape[0]/2), int(img.shape[1]/2), z))
-      sm,cm,axm = clip_LAS(msk,xyz=(int(msk.shape[0]/2), int(msk.shape[1]/2), z))
-      sp,cp,axp = clip_LAS(prd,xyz=(int(prd.shape[0]/2), int(prd.shape[1]/2), z))
+      ax[0].imshow(img[z,:,:], cmap='gray')
+      ax[0].imshow(msk[z,:,:], cmap='jet', alpha=0.4)
 
-      ax[0].imshow(axi, cmap='gray')
-      ax[0].imshow(axm, cmap='jet', alpha=0.4)
-
-      ax[1].imshow(axi, cmap='gray')
-      ax[1].imshow(axp, cmap='jet', alpha=0.4)
+      ax[1].imshow(img[z,:,:], cmap='gray')
+      ax[1].imshow(prd[z,:,:], cmap='jet', alpha=0.4)
 
       fileName = os.path.join(output_dir_png, patient_id + '_' + '_' + str(z) + '.png')
       plt.savefig(fileName)
       plt.close(fig)
+
+  # for z in range(slc_rng):
+  #   if np.sum(msk[:, :, z]) > 0 or np.sum(prd[:, :, z]) > 0:
+  #     fig, ax = plt.subplots(1, 2, figsize=(32, 32))
+  #     si,ci,axi = clip_LAS(img,xyz=(int(img.shape[0]/2), int(img.shape[1]/2), z))
+  #     sm,cm,axm = clip_LAS(msk,xyz=(int(msk.shape[0]/2), int(msk.shape[1]/2), z))
+  #     sp,cp,axp = clip_LAS(prd,xyz=(int(prd.shape[0]/2), int(prd.shape[1]/2), z))
+  #
+  #     ax[0].imshow(axi, cmap='gray')
+  #     ax[0].imshow(axm, cmap='jet', alpha=0.4)
+  #
+  #     ax[1].imshow(axi, cmap='gray')
+  #     ax[1].imshow(axp, cmap='jet', alpha=0.4)
+
+
 
 ## ----------------------------------------
 ## ----------------------------------------
